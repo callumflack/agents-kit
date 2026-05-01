@@ -6,6 +6,12 @@ Use this like a shadcn-style installer: run one command in a target repo, copy t
 
 This repo is a quarry, not a dependency.
 
+## Philosophy
+
+> Compression makes it loadable. Friction makes it honest.
+
+`dotagents-control-plane` is a seed for building repo-local agent harnesses. It keeps the agent surface compressed enough to load and frictional enough to prevent silent drift: `AGENTS.md` points, the router dispatches, resolvers scope the work, gates define done, skills hold technique, logs receipt the run, and `history/` preserves evidence. The seed can travel between repos, but each repo owns its own law.
+
 ## Install In Another Repo
 
 Use `init` for a repo that does not already have a `.agents` control plane.
