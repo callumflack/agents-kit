@@ -15,6 +15,7 @@ function usage() {
 Usage:
   agents-kit init [target] [--target <path>] [--force] [--dry-run]
   agents-kit adopt [target] [--target <path>] [--dry-run]
+  agents-kit update [target] [--target <path>] [--overwrite] [--force] [--dry-run]
 
 Examples:
   agents-kit init
@@ -22,6 +23,8 @@ Examples:
   agents-kit init /path/to/repo --dry-run
   agents-kit adopt --target /path/to/repo
   agents-kit adopt /path/to/repo --dry-run
+  agents-kit update --target /path/to/repo --dry-run
+  agents-kit update --target /path/to/repo --overwrite
 `)
 }
 
@@ -33,6 +36,7 @@ function parseArgs(argv) {
       target: process.cwd(),
       force: false,
       dryRun: false,
+      overwrite: false,
       help: true,
     }
   }
@@ -43,6 +47,7 @@ function parseArgs(argv) {
     target: process.cwd(),
     force: false,
     dryRun: false,
+    overwrite: false,
   }
 
   while (args.length > 0) {
@@ -53,6 +58,8 @@ function parseArgs(argv) {
       options.force = true
     } else if (arg === "--dry-run") {
       options.dryRun = true
+    } else if (arg === "--overwrite") {
+      options.overwrite = true
     } else if (arg === "--target") {
       const value = args.shift()
       if (!value) throw new Error("--target requires a path")
@@ -67,6 +74,14 @@ function parseArgs(argv) {
   }
 
   return options
+}
+
+function isReviewOnly(file) {
+  return file === "AGENTS.md" ||
+    file === ".agents/active-work.md" ||
+    file === ".agents/router.md" ||
+    file.startsWith(".agents/resolvers/") ||
+    file.startsWith(".agents/gates/")
 }
 
 async function exists(filePath) {
@@ -134,7 +149,53 @@ function printDiff(source, target, file) {
   }
 }
 
+function gitStatus(targetRoot) {
+  const inside = spawnSync("git", [
+    "-C",
+    targetRoot,
+    "rev-parse",
+    "--is-inside-work-tree",
+  ], {
+    encoding: "utf8",
+  })
+
+  if (inside.status !== 0 || inside.stdout.trim() !== "true") {
+    return undefined
+  }
+
+  return spawnSync("git", [
+    "-C",
+    targetRoot,
+    "status",
+    "--porcelain",
+  ], {
+    encoding: "utf8",
+  })
+}
+
+function assertCleanWorktree(targetRoot, options) {
+  if (options.force) return
+
+  const status = gitStatus(targetRoot)
+  if (!status) return
+  if (status.error) throw status.error
+  if (status.status !== 0) {
+    throw new Error("could not inspect target git worktree")
+  }
+  if (status.stdout.trim()) {
+    if (options.dryRun) {
+      console.warn("target worktree is not clean; dry-run preview only.")
+      return
+    }
+    throw new Error("target worktree is not clean. Commit or stash first. Use --force only after inspecting the target diff.")
+  }
+}
+
 async function init(options) {
+  if (options.overwrite) {
+    throw new Error("--overwrite is only supported by update")
+  }
+
   const targetRoot = path.resolve(options.target)
   const files = await listFiles(templateRoot)
   const conflicts = []
@@ -175,6 +236,9 @@ async function init(options) {
 async function adopt(options) {
   if (options.force) {
     throw new Error("adopt never overwrites files. Use init --force only when resetting to the seed is intended.")
+  }
+  if (options.overwrite) {
+    throw new Error("--overwrite is only supported by update")
   }
 
   const targetRoot = path.resolve(options.target)
@@ -221,6 +285,68 @@ async function adopt(options) {
   }
 }
 
+async function update(options) {
+  const targetRoot = path.resolve(options.target)
+  assertCleanWorktree(targetRoot, options)
+
+  const files = await listFiles(templateRoot)
+  const changed = []
+  const reviewOnly = []
+
+  for (const file of files) {
+    const source = path.join(templateRoot, file)
+    const target = path.join(targetRoot, file)
+
+    if (!await exists(target)) {
+      console.log(`${options.dryRun ? "would " : ""}create ${file}`)
+      if (!options.dryRun) {
+        await fs.mkdir(path.dirname(target), { recursive: true })
+        await fs.copyFile(source, target)
+      }
+      continue
+    }
+
+    if (await sameFile(source, target)) {
+      console.log(`unchanged ${file}`)
+      continue
+    }
+
+    if (isReviewOnly(file)) {
+      reviewOnly.push(file)
+      console.log(`review local ${file}`)
+      continue
+    }
+
+    changed.push(file)
+    if (options.overwrite) {
+      console.log(`${options.dryRun ? "would " : ""}update ${file}`)
+      if (!options.dryRun) await fs.copyFile(source, target)
+    } else {
+      console.log(`keep local ${file}`)
+    }
+  }
+
+  const reviewFiles = [...reviewOnly, ...(!options.overwrite ? changed : [])]
+  if (reviewFiles.length > 0) {
+    console.log("\nReview diffs for local files:")
+    for (const file of reviewFiles) {
+      printDiff(
+        path.join(templateRoot, file),
+        path.join(targetRoot, file),
+        file,
+      )
+    }
+  }
+
+  if (reviewOnly.length > 0) {
+    console.log("\nReview-only files were not overwritten because they usually contain repo-local doctrine.")
+  }
+
+  if (!options.overwrite && changed.length > 0) {
+    console.log("\nRerun with --overwrite to replace non-doctrine seed files.")
+  }
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2))
   if (options.help || !options.command) {
@@ -233,6 +359,10 @@ async function main() {
   }
   if (options.command === "adopt") {
     await adopt(options)
+    return
+  }
+  if (options.command === "update") {
+    await update(options)
     return
   }
   throw new Error(`unknown command: ${options.command}`)

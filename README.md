@@ -54,13 +54,35 @@ node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs adopt --targe
 
 ## Update In Another Repo
 
-For a repo installed from the seed and still close to it, re-run `init` and review the diff:
+Use `update` when a repo already has agents-kit installed and you want to roll it forward from this seed.
 
 ```bash
-npx github:callumflack/agents-kit init
+npx github:callumflack/agents-kit update
 ```
 
-For a mature repo with local `.agents` doctrine, use `adopt` to add missing new pieces and review skipped-file diffs. Use `--force` only when intentionally resetting files to the seed.
+Local development from this checkout:
+
+```bash
+node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs update --target /path/to/repo
+```
+
+Run a dry pass first:
+
+```bash
+node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs update --target /path/to/repo --dry-run
+```
+
+`update` creates missing seed files, keeps local changes by default, and prints unified review diffs. It expects a clean target git worktree before writing so the resulting diff is readable.
+
+Use `--overwrite` to replace non-doctrine seed files:
+
+```bash
+node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs update --target /path/to/repo --overwrite
+```
+
+Repo-local doctrine files are review-only and are not overwritten by `update`: `AGENTS.md`, `.agents/active-work.md`, `.agents/router.md`, `.agents/resolvers/*`, and `.agents/gates/*`. Merge useful changes manually.
+
+Use `--force` only to skip the clean-worktree guard.
 
 ## What Gets Installed
 
