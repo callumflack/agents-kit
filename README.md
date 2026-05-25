@@ -1,136 +1,173 @@
-# Agents Kit
+# agents-kit
 
-Portable seed for a tiny repo-local `.agents` control plane.
+Portable seed for a repo-local `.agents` control plane.
 
-Use this like a shadcn-style installer: run one command in a target repo, copy the seed files in, then review the diff. The target repo owns the files after install.
+`agents-kit` gives a cold coding agent a small operating surface before it edits:
+where to start, how to route the task, what scope applies, what check proves
+done, and where evidence belongs.
 
-This repo is a quarry, not a dependency.
+It is a seed and quarry, not a runtime dependency. Install it into a target repo,
+review the diff, then let that repo own the files.
 
-## Philosophy
+## Core Model
 
-> Compression makes it loadable. Friction makes it honest.
+- `AGENTS.md` points to the control plane.
+- `.agents/router.md` dispatches task shape to resolver, gate, and skill.
+- `.agents/resolvers/*` scope reads, writes, owners, and non-goals.
+- `.agents/gates/*` verify done with observable checks.
+- `.agents/skills/*` teach repeatable technique.
+- `.agents/logs/*` orient handoff.
+- `history/*` preserves dated evidence.
 
-`agents-kit` is a seed for building repo-local agent harnesses. It keeps the agent surface compressed enough to load and frictional enough to prevent silent drift: `AGENTS.md` points, the router dispatches, resolvers scope the work, gates define done, skills hold technique, logs receipt the run, and `history/` preserves evidence. The seed can travel between repos, but each repo owns its own law.
+## Install
 
-## Install In Another Repo
-
-Use `init` for a repo that does not already have a `.agents` control plane.
-
-Once this repo is available on GitHub, run from a target repo:
+Use `init` for a repo that does not already have `.agents` files.
 
 ```bash
 npx github:callumflack/agents-kit init
 ```
 
-Local development from this checkout:
+Install into another path:
+
+```bash
+npx github:callumflack/agents-kit init --target /path/to/repo
+```
+
+From this checkout:
 
 ```bash
 node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs init --target /path/to/repo
 ```
 
-The installer refuses to overwrite existing files unless `--force` is passed.
+`init` refuses to overwrite conflicting files. Use `--force` only when replacing
+the target files is intentional.
 
-## Adopt Into An Existing Repo
+## Adopt
 
-Use `adopt` when a repo already has local `.agents` files. It copies only missing seed files and keeps local files untouched.
-
-```bash
-npx github:callumflack/agents-kit adopt
-```
-
-Local development from this checkout:
+Use `adopt` when a repo already has local agent files.
 
 ```bash
-node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs adopt --target /path/to/repo
+npx github:callumflack/agents-kit adopt --target /path/to/repo
 ```
 
-Run a dry pass first when adopting into an active repo:
+`adopt` creates missing seed files only. Existing local files are reported as
+`keep local`; differing files get review diffs. Merge useful seed doctrine
+manually.
+
+## Update
+
+Use `update` to roll an existing installation forward from this seed.
 
 ```bash
-node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs adopt --target /path/to/repo --dry-run
+npx github:callumflack/agents-kit update --target /path/to/repo
 ```
 
-`adopt` reports existing local files as `keep local` and prints unified review diffs for those skipped files. Merge useful seed doctrine manually instead of replacing repo-shaped routers, resolvers, gates, or active-work files.
+`update` requires a clean target git worktree before writing. It creates missing
+files, keeps local doctrine by default, and prints review diffs for changed
+files.
 
-## Update In Another Repo
-
-Use `update` when a repo already has agents-kit installed and you want to roll it forward from this seed.
+Replace changed non-doctrine seed files:
 
 ```bash
-npx github:callumflack/agents-kit update
+npx github:callumflack/agents-kit update --target /path/to/repo --overwrite
 ```
 
-Local development from this checkout:
+`--overwrite` still does not replace review-only files.
+
+## Dry Run
+
+Add `--dry-run` to preview without writes.
 
 ```bash
-node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs update --target /path/to/repo
+npx github:callumflack/agents-kit init --target /path/to/repo --dry-run
+npx github:callumflack/agents-kit adopt --target /path/to/repo --dry-run
+npx github:callumflack/agents-kit update --target /path/to/repo --dry-run
 ```
 
-Run a dry pass first:
+For `update`, dry-run can run on a dirty target worktree. It warns and previews
+only.
 
-```bash
-node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs update --target /path/to/repo --dry-run
-```
+## Installed Files
 
-`update` creates missing seed files, keeps local changes by default, and prints unified review diffs. It expects a clean target git worktree before writing so the resulting diff is readable.
-
-Use `--overwrite` to replace non-doctrine seed files:
-
-```bash
-node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs update --target /path/to/repo --overwrite
-```
-
-Repo-local doctrine files are review-only and are not overwritten by `update`: `AGENTS.md`, `.agents/active-work.md`, `.agents/router.md`, `.agents/resolvers/*`, and `.agents/gates/*`. Merge useful changes manually.
-
-Use `--force` only to skip the clean-worktree guard.
-
-## What Gets Installed
+Current template:
 
 ```text
 AGENTS.md
+skills-lock.json
 .agents/
   README.md
   AGENT-CONTROL-PLANE.md
   router.md
-  active-work.md
   resolvers/
     README.md
     agent-tooling.md
+    factory-failure.md
     rule-rinse.md
   gates/
     README.md
     agent-tooling.md
+    factory-failure.md
     rule-rinse.md
   skills/
+    README.md
     agents-kit/
       SKILL.md
-      scripts/check-agents-kit-health.py
+      scripts/
+        check-agents-kit-health.py
+        check-skill-frontmatter.py
   logs/
     README.md
+.scratch/
+  README.md
 history/
-  solutions/
+  README.md
+  plans/
+    README.md
+  lessons/
     README.md
 ```
 
-## Localize After Install
+## Update Protection
 
-1. Edit `.agents/active-work.md`.
-2. Replace placeholder router rows with repo-specific surfaces.
-3. Add repo-specific resolvers and gates only for current work.
-4. Run:
+During `update`, these files are review-only and are not overwritten:
 
-```bash
-python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py
+```text
+AGENTS.md
+skills-lock.json
+.agents/router.md
+.agents/resolvers/*
+.agents/gates/*
+.agents/logs/*
+history/*
+.scratch/*
 ```
 
-5. Review the diff and commit explicit paths.
+All existing files are protected during `adopt`.
 
-## Source Repo Checks
+## Localize
 
-Before changing this seed:
+After install:
+
+1. Keep `AGENTS.md` short.
+2. Replace placeholder router rows only after live repo evidence exists.
+3. Add repo-specific resolvers for recurring task lanes.
+4. Add gates with concrete checks, not vague verification language.
+5. Keep logs for handoff context, not live law.
+6. Keep dated evidence in `history/`.
+
+## Verify
+
+In this source repo:
 
 ```bash
 npm run verify
 ```
 
-The verifier checks that the template has the expected files and that the bundled agents-kit health check passes against the template.
+In an installed target repo:
+
+```bash
+python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py
+```
+
+The source verifier checks the transported template file list and runs the
+installed health check against `templates/default`.
