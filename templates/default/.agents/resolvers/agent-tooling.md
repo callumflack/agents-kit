@@ -23,7 +23,7 @@ Before nontrivial edits in this lane, state the pre-edit ownership receipt:
 Request:
 Resolver:
 Why this resolver:
-Source of truth:
+Source of truth / evidence order:
 Owner surface:
 Allowed writes:
 Forbidden surfaces:

@@ -3,7 +3,7 @@
 Done means:
 
 - `.agents/skills/agents-kit/` exists when `.agents` control-plane behavior is being edited;
-- nontrivial edits in this lane were preceded by a pre-edit ownership receipt naming request, resolver, why this resolver, source of truth, owner surface, allowed writes, forbidden surfaces, done gate, first oracle, next oracle, and skill used last when a skill materially shaped the work;
+- nontrivial edits in this lane were preceded by a pre-edit ownership receipt naming request, resolver, why this resolver, source of truth or evidence order, owner surface, allowed writes, forbidden surfaces, done gate, first oracle, next oracle, and skill used last when a skill materially shaped the work;
 - `python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py` passes when router, resolver, gate, skill, or lesson-artifact structure changes;
 - captured lesson artifacts live under `history/lessons/`, not `.agents/`;
 - `skills-lock.json` matches the intended installed skill set;

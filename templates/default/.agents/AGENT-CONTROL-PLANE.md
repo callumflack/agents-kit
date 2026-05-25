@@ -79,7 +79,7 @@ Use it for nontrivial edits, and always for durable product code, `.agents` cont
 Request:
 Resolver:
 Why this resolver:
-Source of truth:
+Source of truth / evidence order:
 Owner surface:
 Allowed writes:
 Forbidden surfaces:
@@ -89,7 +89,7 @@ Next oracle (stronger/broader check before done):
 Skill used (last, if material):
 ```
 
-The receipt is not a plan, not a session log, and not a new resolver. It can be a short chat update. It prevents stale ownership and wrong-surface edits before action.
+The receipt is not a plan, not a session log, and not a new resolver. It can be a short chat update. It prevents stale ownership and wrong-surface edits before action. When multiple sources can disagree, name the evidence order instead of pretending there is only one source.
 
 Logs happen after durable work. A log may compress receipt fields into orientation when they help future resumption, but the log does not replace the pre-edit receipt.
 
