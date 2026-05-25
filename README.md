@@ -1,13 +1,14 @@
 # agents-kit
 
-Portable seed for a repo-local `.agents` control plane.
+A portable seed for a repo-local `.agents` control plane.
 
-`agents-kit` gives a cold coding agent a small operating surface before it edits:
-where to start, how to route the task, what scope applies, what check proves
-done, and where evidence belongs.
+`agents-kit` gives a cold coding agent a small operating surface before it edits: where to start, how to route the task, what scope applies, what check proves done, and where evidence belongs.
 
-It is a seed and quarry, not a runtime dependency. Install it into a target repo,
-review the diff, then let that repo own the files.
+Use it as a seed: install the template into a target repo, review the diff, and localize it there.
+
+Treat this repo as a quarry: take the control-plane pieces that fit, but do not make `agents-kit` a runtime dependency. After install, the target repo owns its `.agents` files.
+
+For a visual walkthrough of the harness, open [dot-agents-system.html](dot-agents-system.html).
 
 ## Core Model
 
@@ -39,10 +40,17 @@ From this checkout:
 node /Users/cflack/Repos/callumflack/agents-kit/bin/agents-kit.mjs init --target /path/to/repo
 ```
 
-`init` refuses to overwrite conflicting files. Use `--force` only when replacing
-the target files is intentional.
+`init` refuses to overwrite conflicting files. Use `--force` only when replacing the target files is intentional.
 
-## Adopt
+## Before It Edits
+
+For nontrivial work, the agent should state its route before editing: the resolver it picked, the owner surface, allowed writes, forbidden surfaces, done gate, and first check.
+
+That receipt gives you a fast read on whether the agent understood the task before it changes files.
+
+## Existing Repos
+
+### Adopt
 
 Use `adopt` when a repo already has local agent files.
 
@@ -50,11 +58,9 @@ Use `adopt` when a repo already has local agent files.
 npx github:callumflack/agents-kit adopt --target /path/to/repo
 ```
 
-`adopt` creates missing seed files only. Existing local files are reported as
-`keep local`; differing files get review diffs. Merge useful seed doctrine
-manually.
+`adopt` creates missing seed files only. Existing local files are reported as `keep local`; differing files get review diffs. Merge useful seed doctrine manually.
 
-## Update
+### Update
 
 Use `update` to roll an existing installation forward from this seed.
 
@@ -62,9 +68,7 @@ Use `update` to roll an existing installation forward from this seed.
 npx github:callumflack/agents-kit update --target /path/to/repo
 ```
 
-`update` requires a clean target git worktree before writing. It creates missing
-files, keeps local doctrine by default, and prints review diffs for changed
-files.
+`update` requires a clean target git worktree before writing. It creates missing files, keeps local doctrine by default, and prints review diffs for changed files.
 
 Replace changed non-doctrine seed files:
 
@@ -74,7 +78,7 @@ npx github:callumflack/agents-kit update --target /path/to/repo --overwrite
 
 `--overwrite` still does not replace review-only files.
 
-## Dry Run
+### Dry Run
 
 Add `--dry-run` to preview without writes.
 
@@ -84,8 +88,7 @@ npx github:callumflack/agents-kit adopt --target /path/to/repo --dry-run
 npx github:callumflack/agents-kit update --target /path/to/repo --dry-run
 ```
 
-For `update`, dry-run can run on a dirty target worktree. It warns and previews
-only.
+For `update`, dry-run can run on a dirty target worktree. It warns and previews only.
 
 ## Installed Files
 
@@ -170,5 +173,4 @@ In an installed target repo:
 python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py
 ```
 
-The source verifier checks the transported template file list and runs the
-installed health check against `templates/default`.
+The source verifier checks the transported template file list and runs the installed health check against `templates/default`.

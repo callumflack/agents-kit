@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>agents-kit — thin agent harness explainer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#151515",
+              paper: "#fffef9",
+              field: "#f7f3e8",
+              line: "#ded7c7",
+              muted: "#66645f",
+              teal: "#1f6f68",
+              rust: "#9a3412",
+              moss: "#4f6f23"
+            },
+            boxShadow: {
+              soft: "0 1px 0 rgba(20,20,20,.04), 0 18px 50px rgba(20,20,20,.08)"
+            },
+            fontFamily: {
+              sans: ["ui-sans-serif", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+              mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"]
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      html { scroll-behavior: smooth; }
+      body {
+        background:
+          radial-gradient(circle at 18% 0%, rgba(31, 111, 104, 0.12), transparent 32rem),
+          linear-gradient(90deg, rgba(154, 52, 18, 0.06), transparent 36rem),
+          #f7f3e8;
+      }
+      .flow-line::after {
+        content: "";
+        position: absolute;
+        left: calc(100% + 0.35rem);
+        top: 50%;
+        width: 1.8rem;
+        height: 1px;
+        background: #b8ae9a;
+      }
+      .flow-line::before {
+        content: "";
+        position: absolute;
+        left: calc(100% + 2.05rem);
+        top: calc(50% - 4px);
+        border-left: 8px solid #b8ae9a;
+        border-top: 4px solid transparent;
+        border-bottom: 4px solid transparent;
+      }
+      .receipt-grid {
+        grid-template-columns: 10rem minmax(0, 1fr);
+      }
+      @media (max-width: 900px) {
+        .flow-line::before,
+        .flow-line::after { display: none; }
+        .receipt-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+    <script>
+      const copyIcon = '<svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="10" height="10" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span>Copy</span>';
+      const checkIcon = '<svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"></path></svg><span>Copied</span>';
+
+      async function copyCommand(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+          try {
+            await navigator.clipboard.writeText(text);
+            return;
+          } catch (_error) {
+            // Fall back for local file previews where clipboard permission can reject.
+          }
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.top = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("[data-copy-command]").forEach((button) => {
+          button.innerHTML = copyIcon;
+          button.addEventListener("click", async () => {
+            button.innerHTML = checkIcon;
+            button.classList.add("border-emerald-400", "text-emerald-300");
+            try {
+              await copyCommand(button.dataset.copyCommand);
+            } catch (_error) {
+              // Keep the button feedback deterministic; the command is still visible.
+            }
+            window.setTimeout(() => {
+              button.innerHTML = copyIcon;
+              button.classList.remove("border-emerald-400", "text-emerald-300");
+            }, 1000);
+          });
+        });
+      });
+    </script>
+  </head>
+  <body class="text-ink antialiased">
+    <div class="mx-auto grid w-[min(1180px,calc(100vw-2rem))] grid-cols-1 gap-10 py-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:py-12">
+      <nav class="lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)]">
+        <a class="mb-6 block font-semibold tracking-tight" href="#top">agents-kit</a>
+        <div class="grid gap-2 text-sm text-muted">
+          <a class="hover:text-ink" href="#problem">Why it exists</a>
+          <a class="hover:text-ink" href="#model">Control plane</a>
+          <a class="hover:text-ink" href="#path">Request to proof</a>
+          <a class="hover:text-ink" href="#receipt">Before it edits</a>
+          <a class="hover:text-ink" href="#commands">Install paths</a>
+          <a class="hover:text-ink" href="#files">Installed files</a>
+          <a class="hover:text-ink" href="#repair">Repair loop</a>
+          <a class="hover:text-ink" href="#verify">Verify</a>
+        </div>
+      </nav>
+
+      <main id="top" class="min-w-0">
+        <header class="pb-8">
+          <p class="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-teal">repo-local agent harness</p>
+          <h1 class="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-[-0.04em] sm:text-7xl">A thin control plane for cold coding agents.</h1>
+          <p class="mt-6 max-w-3xl text-xl leading-8 text-muted"><code class="rounded border border-line bg-paper px-1.5 py-0.5 text-[0.9em]">agents-kit</code> installs a portable <code class="rounded border border-line bg-paper px-1.5 py-0.5 text-[0.9em]">.agents</code> system into a target repo: router, resolvers, gates, skills, logs, and history. It gives an agent just enough structure to classify work, stay in scope, prove done, and repair repeated misses.</p>
+          <div class="mt-7 grid gap-3 sm:grid-cols-3">
+            <div class="rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="text-xs font-bold uppercase tracking-[0.16em] text-teal">seed</p>
+              <p class="mt-2 text-sm text-muted">Install the default harness, review the diff, localize it in the target repo.</p>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="text-xs font-bold uppercase tracking-[0.16em] text-rust">quarry</p>
+              <p class="mt-2 text-sm text-muted">Take the control-plane pieces that fit. Do not make this package runtime law.</p>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="text-xs font-bold uppercase tracking-[0.16em] text-moss">owned</p>
+              <p class="mt-2 text-sm text-muted">After install, the target repo owns its <code class="rounded border border-line bg-field px-1 py-0.5 text-[0.9em]">.agents</code> files and evolves them locally.</p>
+            </div>
+          </div>
+        </header>
+
+        <section id="problem" class="mt-12 rounded-xl border border-line bg-paper p-6 shadow-soft">
+          <div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+            <div>
+              <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-rust">why it exists</p>
+              <h2 class="text-3xl font-semibold tracking-[-0.025em]">Cold agents guess unless the repo gives them a harness.</h2>
+              <p class="mt-4 text-muted">Most coding agents enter a repo without a local operating surface. They infer task shape from chat, inspect whichever files look nearby, and call work done with whatever proof they remember.</p>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="rounded-lg border border-line bg-field p-4">
+                <p class="font-semibold">What kind of work is this?</p>
+                <p class="mt-1 text-sm text-muted">Docs, product code, skill work, repair, or rule quality.</p>
+              </div>
+              <div class="rounded-lg border border-line bg-field p-4">
+                <p class="font-semibold">What can it touch?</p>
+                <p class="mt-1 text-sm text-muted">Owner surface, allowed writes, and forbidden surfaces.</p>
+              </div>
+              <div class="rounded-lg border border-line bg-field p-4">
+                <p class="font-semibold">What proves done?</p>
+                <p class="mt-1 text-sm text-muted">A gate names the real check before the claim.</p>
+              </div>
+              <div class="rounded-lg border border-line bg-field p-4">
+                <p class="font-semibold">What happens after a miss?</p>
+                <p class="mt-1 text-sm text-muted">Classify, repair the owner surface, then verify.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="model" class="mt-16">
+          <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-teal">control plane</p>
+              <h2 class="text-3xl font-semibold tracking-[-0.025em]">Small files, separate jobs.</h2>
+            </div>
+            <p class="max-w-xl text-sm text-muted">The harness works because each surface has one job. It keeps rules loadable and stops logs, history, skills, and gates from impersonating each other.</p>
+          </div>
+
+          <div class="grid gap-3 lg:grid-cols-7">
+            <div class="flow-line relative rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="font-mono text-xs text-teal">AGENTS.md</p>
+              <p class="mt-2 text-sm font-semibold">points</p>
+            </div>
+            <div class="flow-line relative rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="font-mono text-xs text-teal">router</p>
+              <p class="mt-2 text-sm font-semibold">dispatches</p>
+            </div>
+            <div class="flow-line relative rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="font-mono text-xs text-teal">resolvers</p>
+              <p class="mt-2 text-sm font-semibold">scope</p>
+            </div>
+            <div class="flow-line relative rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="font-mono text-xs text-teal">gates</p>
+              <p class="mt-2 text-sm font-semibold">verify</p>
+            </div>
+            <div class="flow-line relative rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="font-mono text-xs text-teal">skills</p>
+              <p class="mt-2 text-sm font-semibold">teach</p>
+            </div>
+            <div class="flow-line relative rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="font-mono text-xs text-teal">logs</p>
+              <p class="mt-2 text-sm font-semibold">orient</p>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="font-mono text-xs text-teal">history</p>
+              <p class="mt-2 text-sm font-semibold">preserves</p>
+            </div>
+          </div>
+
+          <div class="mt-5 grid gap-4 md:grid-cols-3">
+            <article class="rounded-lg border border-line bg-paper p-5">
+              <h3 class="font-semibold">Router chooses the lane</h3>
+              <p class="mt-2 text-sm text-muted">A task trigger maps to one resolver, one gate, and a default skill.</p>
+            </article>
+            <article class="rounded-lg border border-line bg-paper p-5">
+              <h3 class="font-semibold">Resolvers name the scope</h3>
+              <p class="mt-2 text-sm text-muted">Required reads, owned surfaces, allowed writes, non-goals, and failure signs.</p>
+            </article>
+            <article class="rounded-lg border border-line bg-paper p-5">
+              <h3 class="font-semibold">Gates decide done</h3>
+              <p class="mt-2 text-sm text-muted">A gate names the observable command, inspection, or blocker before the agent closes.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="path" class="mt-16">
+          <div class="mb-6">
+            <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-teal">request to proof</p>
+            <h2 class="text-3xl font-semibold tracking-[-0.025em]">The harness turns a chat request into a checked path.</h2>
+          </div>
+          <div class="grid gap-3 md:grid-cols-5">
+            <div class="rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="text-xs font-bold uppercase tracking-[0.14em] text-rust">1. Request</p>
+              <p class="mt-3 text-sm text-muted">The user asks for work in natural language.</p>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="text-xs font-bold uppercase tracking-[0.14em] text-rust">2. Route</p>
+              <p class="mt-3 text-sm text-muted">The router picks the resolver, gate, and skill.</p>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="text-xs font-bold uppercase tracking-[0.14em] text-rust">3. Receipt</p>
+              <p class="mt-3 text-sm text-muted">The agent names owner, writes, forbidden surfaces, and first check.</p>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="text-xs font-bold uppercase tracking-[0.14em] text-rust">4. Work</p>
+              <p class="mt-3 text-sm text-muted">Edits stay inside the selected owner surface.</p>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4 shadow-soft">
+              <p class="text-xs font-bold uppercase tracking-[0.14em] text-rust">5. Gate</p>
+              <p class="mt-3 text-sm text-muted">Done means the named proof ran, or the blocker is visible.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="receipt" class="mt-16 rounded-xl border border-line bg-ink p-6 text-paper shadow-soft">
+          <div class="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+            <div>
+              <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">before it edits</p>
+              <h2 class="text-3xl font-semibold tracking-[-0.025em]">The quick eval is the point.</h2>
+              <p class="mt-4 text-stone-300">For nontrivial work, the agent should say how it understands the task before changing files. If the owner, scope, or first check is wrong, you can correct it while the repo is still untouched.</p>
+            </div>
+            <div class="rounded-lg border border-stone-700 bg-stone-950 p-5 font-mono text-sm">
+              <div class="receipt-grid grid gap-x-5 gap-y-2">
+                <span class="text-stone-500">Resolver</span><span>.agents/resolvers/agent-tooling.md</span>
+                <span class="text-stone-500">Owner surface</span><span>dot-agents-system.html and README link</span>
+                <span class="text-stone-500">Allowed writes</span><span>explainer docs only</span>
+                <span class="text-stone-500">Forbidden</span><span>CLI, shipped template, ignored local skills</span>
+                <span class="text-stone-500">Done gate</span><span>stale terms gone, verify passes, browser check</span>
+                <span class="text-stone-500">First check</span><span>rg for stale source terms</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="commands" class="mt-16">
+          <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-teal">install paths</p>
+          <h2 class="text-3xl font-semibold tracking-[-0.025em]">Three commands, one ownership rule.</h2>
+          <div class="mt-6 grid gap-4 lg:grid-cols-3">
+            <article class="rounded-lg border border-line bg-paper p-5 shadow-soft">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-semibold">New repo</h3>
+                <button type="button" data-copy-command="npx github:callumflack/agents-kit init" class="inline-flex items-center gap-1 rounded-md border border-line bg-field px-2 py-1 text-xs text-muted hover:text-ink" aria-label="Copy init command"></button>
+              </div>
+              <pre class="mt-3 overflow-x-auto rounded-md bg-ink p-4 text-xs text-stone-100"><code>npx github:callumflack/agents-kit init</code></pre>
+              <p class="mt-3 text-sm text-muted">Copy the default harness into a repo that does not already have <code class="rounded border border-line bg-field px-1 py-0.5 text-[0.9em]">.agents</code> files.</p>
+            </article>
+            <article class="rounded-lg border border-line bg-paper p-5 shadow-soft">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-semibold">Existing repo</h3>
+                <button type="button" data-copy-command="npx github:callumflack/agents-kit adopt --dry-run" class="inline-flex items-center gap-1 rounded-md border border-line bg-field px-2 py-1 text-xs text-muted hover:text-ink" aria-label="Copy adopt command"></button>
+              </div>
+              <pre class="mt-3 overflow-x-auto rounded-md bg-ink p-4 text-xs text-stone-100"><code>npx github:callumflack/agents-kit adopt --dry-run</code></pre>
+              <p class="mt-3 text-sm text-muted">Preview missing seed files while keeping local files untouched.</p>
+            </article>
+            <article class="rounded-lg border border-line bg-paper p-5 shadow-soft">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-semibold">Installed repo</h3>
+                <button type="button" data-copy-command="npx github:callumflack/agents-kit update --dry-run" class="inline-flex items-center gap-1 rounded-md border border-line bg-field px-2 py-1 text-xs text-muted hover:text-ink" aria-label="Copy update command"></button>
+              </div>
+              <pre class="mt-3 overflow-x-auto rounded-md bg-ink p-4 text-xs text-stone-100"><code>npx github:callumflack/agents-kit update --dry-run</code></pre>
+              <p class="mt-3 text-sm text-muted">Preview a roll-forward from the seed without overwriting review-only doctrine.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="files" class="mt-16">
+          <div class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+            <div>
+              <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-teal">installed files</p>
+              <h2 class="text-3xl font-semibold tracking-[-0.025em]">The harness is thin because the file roles are explicit.</h2>
+              <p class="mt-4 text-muted">The shipped template is intentionally small. Product-specific routes, gates, and skills are added by the target repo only after live evidence exists.</p>
+            </div>
+            <pre class="overflow-x-auto rounded-lg border border-line bg-ink p-5 text-sm leading-6 text-stone-100 shadow-soft"><code>AGENTS.md
+.agents/router.md
+.agents/resolvers/*
+.agents/gates/*
+.agents/skills/*
+.agents/logs/*
+.scratch/README.md
+history/README.md
+history/plans/README.md
+history/lessons/README.md</code></pre>
+          </div>
+
+          <div class="mt-5 grid gap-3 md:grid-cols-3">
+            <div class="rounded-lg border border-line bg-paper p-4">
+              <p class="text-xs font-bold uppercase tracking-[0.14em] text-teal">live law</p>
+              <p class="mt-3 font-mono text-sm">AGENTS.md<br>.agents/router.md<br>.agents/resolvers/*<br>.agents/gates/*</p>
+              <p class="mt-3 text-sm text-muted">Read before edits. Patch only when future behavior must change.</p>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4">
+              <p class="text-xs font-bold uppercase tracking-[0.14em] text-rust">active state</p>
+              <p class="mt-3 font-mono text-sm">.scratch/*<br>.agents/logs/*</p>
+              <p class="mt-3 text-sm text-muted">Scratch carries current packets. Logs orient handoff; they are not law.</p>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4">
+              <p class="text-xs font-bold uppercase tracking-[0.14em] text-moss">evidence</p>
+              <p class="mt-3 font-mono text-sm">history/*<br>history/plans/*<br>history/lessons/*</p>
+              <p class="mt-3 text-sm text-muted">History preserves dated evidence. <code class="rounded border border-line bg-field px-1 py-0.5 text-[0.9em]">factory-failure</code> owns lesson promotion.</p>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4 md:col-span-3">
+              <p class="text-xs font-bold uppercase tracking-[0.14em] text-teal">technique and provenance</p>
+              <p class="mt-3 font-mono text-sm">.agents/skills/*<br>skills-lock.json<br>.agents/skills/agents-kit/scripts/*</p>
+              <p class="mt-3 text-sm text-muted">Skills teach repeatable technique. The lock records provenance. Scripts check the control plane itself.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="repair" class="mt-16 rounded-xl border border-line bg-paper p-6 shadow-soft">
+          <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-rust">repair loop</p>
+          <h2 class="text-3xl font-semibold tracking-[-0.025em]">Repeated misses become harness repairs, not vibes.</h2>
+          <p class="mt-3 max-w-3xl text-muted">Not every mistake becomes doctrine. The repair loop is for repeated misses, weak gates, stale task state, and unclear owners. The fix is the smallest live surface that prevents the same failure next time.</p>
+          <div class="mt-6 grid gap-3 md:grid-cols-5">
+            <div class="rounded-lg bg-field p-4"><p class="text-sm font-semibold">1. Miss</p><p class="mt-1 text-xs text-muted">Check failed, correction repeated, scope drifted.</p></div>
+            <div class="rounded-lg bg-field p-4"><p class="text-sm font-semibold">2. Classify</p><p class="mt-1 text-xs text-muted">factory-failure names the failure class.</p></div>
+            <div class="rounded-lg bg-field p-4"><p class="text-sm font-semibold">3. Own</p><p class="mt-1 text-xs text-muted">Pick router, resolver, gate, skill, script, log, or history.</p></div>
+            <div class="rounded-lg bg-field p-4"><p class="text-sm font-semibold">4. Patch</p><p class="mt-1 text-xs text-muted">Change the smallest live surface that prevents the repeat.</p></div>
+            <div class="rounded-lg bg-field p-4"><p class="text-sm font-semibold">5. Verify</p><p class="mt-1 text-xs text-muted">Run the owner gate and health check when structure changes.</p></div>
+          </div>
+        </section>
+
+        <section id="verify" class="mt-16 mb-12">
+          <p class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-teal">proof</p>
+          <h2 class="text-3xl font-semibold tracking-[-0.025em]">The seed has checks. Installed repos get checks too.</h2>
+          <div class="mt-6 grid gap-4 md:grid-cols-2">
+            <article class="rounded-lg border border-line bg-paper p-5 shadow-soft">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-semibold">Source repo</h3>
+                <button type="button" data-copy-command="npm run verify" class="inline-flex items-center gap-1 rounded-md border border-line bg-field px-2 py-1 text-xs text-muted hover:text-ink" aria-label="Copy source verify command"></button>
+              </div>
+              <pre class="mt-3 overflow-x-auto rounded-md bg-ink p-4 text-sm text-stone-100"><code>npm run verify</code></pre>
+              <p class="mt-3 text-sm text-muted">Checks the required template file list and runs the bundled health check against <code class="rounded border border-line bg-field px-1 py-0.5 text-[0.9em]">templates/default</code>.</p>
+            </article>
+            <article class="rounded-lg border border-line bg-paper p-5 shadow-soft">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-semibold">Installed repo</h3>
+                <button type="button" data-copy-command="python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py" class="inline-flex items-center gap-1 rounded-md border border-line bg-field px-2 py-1 text-xs text-muted hover:text-ink" aria-label="Copy installed health check command"></button>
+              </div>
+              <pre class="mt-3 overflow-x-auto rounded-md bg-ink p-4 text-sm text-stone-100"><code>python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py</code></pre>
+              <p class="mt-3 text-sm text-muted">Checks router references, resolver shape, gates, skill inventory, retired surfaces, and lesson metadata.</p>
+            </article>
+          </div>
+          <div class="mt-8 rounded-lg border border-line bg-paper p-5">
+            <p class="text-sm text-muted">The maintenance rule is blunt: keep <code class="rounded border border-line bg-field px-1 py-0.5 text-[0.9em]">AGENTS.md</code> small, keep live law in <code class="rounded border border-line bg-field px-1 py-0.5 text-[0.9em]">.agents</code>, keep active state in <code class="rounded border border-line bg-field px-1 py-0.5 text-[0.9em]">.scratch</code>, keep dated evidence in <code class="rounded border border-line bg-field px-1 py-0.5 text-[0.9em]">history</code>, and let the target repo own its local doctrine.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
