@@ -134,6 +134,7 @@ During `update`, these files are review-only and are not overwritten:
 ```text
 AGENTS.md
 skills-lock.json
+.agents/AGENT-CONTROL-PLANE.md
 .agents/router.md
 .agents/resolvers/*
 .agents/gates/*
