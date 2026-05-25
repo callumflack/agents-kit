@@ -2,3 +2,8 @@ node_modules/
 .DS_Store
 *.log
 tmp/
+
+# Local installed skill mirrors. Unignore repo-owned skills by name.
+/.agents/skills/*
+!/.agents/skills/README.md
+/skills-lock.json
