@@ -13,6 +13,7 @@ Boot file only. This repo ships a reusable `.agents` control-plane seed and also
 ## Invariants
 
 - `templates/default/**` is the shipped harness source of truth.
+- Before editing `templates/default/**`, read `docs/agents-kit-maintainer.md`; shipped files must read as if the agent is inside an installed target repo.
 - `templates/default/.agents/skills/agents-kit/SKILL.md` is shipped seed technique, not the root maintainer skill.
 - Root `.agents/skills/` and root `skills-lock.json` are local installed skill mirrors; do not commit them.
 - `README.md` is the practical installer entry point.
