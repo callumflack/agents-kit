@@ -10,20 +10,27 @@ const templateRoot = path.join(repoRoot, "templates", "default")
 
 const requiredFiles = [
   "AGENTS.md",
+  "skills-lock.json",
   ".agents/README.md",
   ".agents/AGENT-CONTROL-PLANE.md",
   ".agents/router.md",
-  ".agents/active-work.md",
   ".agents/resolvers/README.md",
   ".agents/resolvers/agent-tooling.md",
+  ".agents/resolvers/factory-failure.md",
   ".agents/resolvers/rule-rinse.md",
   ".agents/gates/README.md",
   ".agents/gates/agent-tooling.md",
+  ".agents/gates/factory-failure.md",
   ".agents/gates/rule-rinse.md",
+  ".agents/skills/README.md",
   ".agents/skills/agents-kit/SKILL.md",
   ".agents/skills/agents-kit/scripts/check-agents-kit-health.py",
+  ".agents/skills/agents-kit/scripts/check-skill-frontmatter.py",
   ".agents/logs/README.md",
-  "history/solutions/README.md",
+  ".scratch/README.md",
+  "history/README.md",
+  "history/plans/README.md",
+  "history/lessons/README.md",
 ]
 
 async function exists(relativePath) {

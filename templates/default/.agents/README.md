@@ -1,8 +1,14 @@
 # Agent Control Plane
 
-Live agent operating files for this repository.
+Live agent operating files for this repo.
+
+`AGENTS.md` points. Router dispatches. Resolvers scope. Gates verify. Skills teach technique. Logs orient handoff. History is evidence.
+
+Rule of thumb: if a cold agent does not need it to orient, route, constrain scope, apply reusable technique, verify done, or resume handoff, it does not belong in `.agents`.
 
 ## Map
+
+Scratch is for planned executable work. Logs are for preserving orientation after real work happens. Git is for diffs.
 
 ```text
 AGENTS.md
@@ -12,10 +18,7 @@ AGENTS.md
   dispatch table: task trigger -> resolver -> gate -> skill
 
 .agents/AGENT-CONTROL-PLANE.md
-  meta doctrine for where router, resolver, gate, skill, log, and history rules belong
-
-.agents/active-work.md
-  current project context and next pointers
+  doctrine for where control-plane rules, gates, skills, logs, history, and lessons belong
 
 .agents/resolvers/
   task-specific decision rules
@@ -24,31 +27,29 @@ AGENTS.md
   done-means-done checklists
 
 .agents/skills/
-  techniques loaded only when routed
+  repo-local techniques loaded only when routed
+
+.agents/skills/agents-kit/scripts/
+  control-plane health checks only
 
 .agents/logs/
-  session receipts only
-
-.agents/legacy/
-  old instruction snapshots, reference only
+  session notes and handoff context only
 
 history/
-  durable evidence: audits, plans, decisions, reports
+  durable evidence: audits, decisions, reports
+
+history/plans/
+  completed plans
+
+history/lessons/
+  captured lesson artifacts; factory-failure owns the lifecycle
 ```
 
 ## Change Rule
 
-Patch the narrowest live file that would have prevented the miss:
+Repair classification lives in `.agents/resolvers/factory-failure.md`.
 
-```text
-routing miss -> .agents/router.md
-classification miss -> .agents/resolvers/
-completion miss -> .agents/gates/
-technique miss -> .agents/skills/
-current-context miss -> .agents/active-work.md
-receipt/log miss -> .agents/logs/README.md
-historical artifact -> history/
-```
+Use this map only for placement after the classifier names the owner: router dispatches, resolvers scope, gates verify, skills teach technique, logs orient handoff, and history preserves evidence.
 
 Do not add workflow detail to `AGENTS.md`.
 Do not learn live rules from `.agents/logs/` or `history/`.
@@ -60,7 +61,7 @@ Resolvers and gates are live hypotheses. First drafts are not trusted.
 Before treating a resolver/gate as solid:
 
 1. Inspect the relevant code and docs.
-2. Run the resolver mentally against 2-3 real scenarios from this repo.
+2. Run the resolver against 2-3 real scenarios from this repo.
 3. Add explicit non-goals.
 4. Add one cold-agent test.
 5. Criticize the resolver: what would make an agent do the wrong thing?

@@ -78,10 +78,13 @@ function parseArgs(argv) {
 
 function isReviewOnly(file) {
   return file === "AGENTS.md" ||
-    file === ".agents/active-work.md" ||
+    file === "skills-lock.json" ||
     file === ".agents/router.md" ||
     file.startsWith(".agents/resolvers/") ||
-    file.startsWith(".agents/gates/")
+    file.startsWith(".agents/gates/") ||
+    file.startsWith(".agents/logs/") ||
+    file.startsWith("history/") ||
+    file.startsWith(".scratch/")
 }
 
 async function exists(filePath) {
@@ -229,7 +232,7 @@ async function init(options) {
 
   if (!options.dryRun) {
     console.log("\nInstalled agents-kit control plane.")
-    console.log("Next: edit .agents/active-work.md, localize .agents/router.md, run the health check, and review the diff.")
+    console.log("Next: localize .agents/router.md, run the health check, and review the diff.")
   }
 }
 

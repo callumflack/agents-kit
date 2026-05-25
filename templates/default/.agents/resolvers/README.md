@@ -6,7 +6,6 @@ Resolvers decide task shape. They do not hold technique dumps.
 
 Each resolver should state:
 
-- status: draft, rinsed, or stable;
 - trigger;
 - required reads;
 - owned files/surfaces;
@@ -18,6 +17,6 @@ Each resolver should state:
 
 ## Rinse Before Trust
 
-A resolver is draft until it has been criticized against real code and at least 2-3 real scenarios.
+If resolver confidence matters, record an explicit `Last Rinsed` note with the date, scenarios, and log link. Do not leave vague `Status: draft` labels behind as stale metadata.
 
 Use `.agents/resolvers/rule-rinse.md` for that pass.

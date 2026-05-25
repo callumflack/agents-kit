@@ -1,39 +1,31 @@
 # AGENTS
 
-Boot file only. Do not put workflow detail here.
+Boot file only. Points to the live `.agents` control plane; do not put workflow detail here.
 
 ## Start
 
 1. Read `.agents/router.md`.
-2. Read `.agents/active-work.md` when the request needs current project context.
-3. Pick the matching resolver.
-4. Run the required gate before calling the task done.
-5. If the work changes durable state, write a receipt in `.agents/logs/`.
+2. Pick the narrowest matching resolver.
+3. Run the required gate before calling the task done.
+4. If handoff context changes, update the relevant session note in `.agents/logs/`.
+5. Keep the selected resolver, gate, logs, and Repair Rule live through the session.
 
 ## Invariants
 
 - Stage explicit paths only.
-- Do not commit secrets, local credentials, `.env*`, `.pi/`, caches, or build output.
-- `history/` is evidence: audits, plans, decisions, reports. It is not live operating law.
-- `.agents/` is the control plane: router, resolvers, gates, active state, logs, skills.
-
-## Skills
-
-Repo-local Codex skills live in `.agents/skills/`.
-
-When a user needs another agent host, sync or copy the needed skills into that host's expected local directory, for example `.claude/skills/` and `.claude/commands/` for Claude. Keep `.agents/skills/` as the Codex-facing repo source unless the user says otherwise.
+- Do not commit secrets, local credentials, `.env*`, caches, build output, or copied `node_modules`.
+- `.agents/` is the control plane: router, resolvers, gates, logs, skills.
+- Repo-specific product, runtime, docs, and tracker rules belong in resolvers, gates, docs, or skills, not in this boot file.
 
 ## Repair Rule
 
-If an agent repeats a mistake, patch the narrowest live surface that would have prevented it:
+Trigger this rule immediately when a user correction repeats, scope drifts after correction, or done was claimed without the required gate. Stop normal execution and contain the miss:
 
-| Miss | Patch |
-| --- | --- |
-| wrong task route | `.agents/router.md` |
-| wrong decision shape | `.agents/resolvers/*` |
-| weak done check | `.agents/gates/*` |
-| technique gap | `.agents/skills/*` |
-| stale plan/history | new `history/YYMMDD-{type}-{slug}.md` |
-| recurring project context | `.agents/active-work.md` |
+If the user says `stop`, `no`, `not that`, or repeats the same correction class:
 
-`AGENTS.md` points. Resolvers decide shape. Gates decide done. Skills hold technique. Logs are receipts. History is evidence.
+- stop editing immediately;
+- restate the current request in one line;
+- do not fix forward until the task is re-aligned;
+- then route repair through `.agents/resolvers/factory-failure.md`.
+
+`AGENTS.md` points. Resolvers decide shape. Gates decide done. Skills hold technique. Logs orient the next session.

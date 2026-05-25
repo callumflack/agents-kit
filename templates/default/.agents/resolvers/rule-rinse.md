@@ -1,7 +1,5 @@
 # Rule Rinse Resolver
 
-Status: stable process, draft targets.
-
 ## Trigger
 
 Use when creating, reviewing, or improving `.agents/router.md`, `.agents/resolvers/*`, `.agents/gates/*`, or agent skill routing.
@@ -21,7 +19,7 @@ Use when creating, reviewing, or improving `.agents/router.md`, `.agents/resolve
 - `.agents/gates/*`
 - `.agents/skills/*` when the issue is technique or skill routing
 - `.agents/AGENT-CONTROL-PLANE.md` when the issue is placement or doctrine
-- `.agents/logs/*` receipts for the rinse
+- `.agents/logs/*` session notes for the rinse
 
 ## Method
 
@@ -38,7 +36,7 @@ If the user asked for critique only, propose the patch instead of applying it.
 ## Allowed Writes
 
 - The narrowest router, resolver, gate, skill, or control-plane doctrine file needed to prevent the miss.
-- `.agents/logs/YYMMDD-*.md` receipt for the pass.
+- `.agents/logs/YYMMDD-*.md` session note for the pass.
 
 ## Non-Goals
 
