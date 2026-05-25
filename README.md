@@ -6,7 +6,7 @@ A portable seed for a repo-local `.agents` control plane.
 
 Use it as a seed: install the template into a target repo, review the diff, and localize it there.
 
-Treat this repo as a quarry: take the control-plane pieces that fit, but do not make `agents-kit` a runtime dependency. After install, the target repo owns its `.agents` files.
+Treat this repo as a quarry: take the control-plane pieces that fit, but do not make `agents-kit` a runtime dependency. After install, the target repo owns local doctrine; `.agents/skills/agents-kit/**` stays seed-managed unless deliberately forked.
 
 For a visual walkthrough of the harness, open [dot-agents-system.html](dot-agents-system.html).
 
