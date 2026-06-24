@@ -60,3 +60,29 @@ The first command should return no matches when the shipped skill was edited.
 Also run `npm pack --dry-run --json` when package contents, `package.json` `files`, installer distribution, or shipped file paths change.
 
 Smoke test package commands when installer behavior changes. Cover clean-worktree, dirty-worktree, dry-run, overwrite, and review-only cases for the touched command path.
+
+## Harvest Rule (2026-06-10)
+
+Before any seed release, diff the live unity-surfaces `.agents` shape (`/Users/cflack/Repos/vana-com/unity-surfaces/.agents`: top-level entries plus resolver/gate/skill filenames) against `templates/default`. Classify each delta adopt/reject/defer with a dated note in this section.
+
+### Harvest 2026-06-10
+
+Live-only deltas:
+
+| Delta | Decision | Note |
+| --- | --- | --- |
+| top-level `loops/` (`doc-drift.md`, `doc-drift-state.md`) | defer | adopt into the seed after 5 recorded loop runs including verifier verdicts demonstrate the shape holds; kit priority rule: rows only after live repo evidence |
+| resolvers `repo-bootstrap.md`, `runtime-boundary.md`, `shared-package.md`, `testing.md`, `web-surface.md` | reject | repo-grown surfaces; the seed ships the minimal control plane and target repos grow their own |
+| gates `git-handover.md`, `repo-bootstrap.md`, `runtime-boundary.md`, `shared-package.md`, `testing.md`, `web-surface.md` | reject | pair with repo-grown resolvers, not seed doctrine |
+| 50 installed skills beyond `agents-kit` | reject | target-local, lock-managed installs; the seed ships only the `agents-kit` operator skill |
+| `.DS_Store` (top-level and `skills/`) | reject | OS noise |
+
+No seed entry is missing from live.
+
+Drift note: `templates/default/.agents/resolvers/factory-failure.md` carries uncommitted drift (a Friction Promotion Shape addition) awaiting the owner's commit. Do not commit it during harvest.
+
+### Delta noted 2026-06-11
+
+| Delta | Decision | Note |
+| --- | --- | --- |
+| top-level `roles/` (vendor-neutral sub-agent role doctrine; `.claude/agents/`/`.codex/agents/` as thin capability adapters) | defer (adopt-candidate) | ratified as unity law 2026-06-11 per Callum (Authority Map row added); minted by an agent session in unity `60f5e0c6` — no ecosystem prior art beyond Flue's roles primitive. Adopt into the seed once a second role (e.g. `doc-drift-verifier`) proves the pattern beyond one instance |
