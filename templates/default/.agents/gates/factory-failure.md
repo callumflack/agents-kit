@@ -22,6 +22,7 @@ Done means:
 - `python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py` passes when router, resolver, gate, skill, or learning structure changes;
 - the relevant repo-owned check passes when repairing task-state drift, or the remaining state blocker is recorded as HITL/blocker;
 - touched `history/lessons/*` notes record a promotion state: context-only, live-promotion, no-learning, or HITL;
+- live-promotion is done only when the original miss scenario is replayed as a cold-agent test against the patched surface, or the new mechanical check is shown failing on the pre-patch state, and the replay result is recorded in the lesson note (or the failure log when no lesson note exists);
 - lesson or history changes preserve source episodes and do not consolidate multiple lessons into broader doctrine unless a live owner surface is explicitly patched and named;
 - any skipped check has a concrete blocker and residual risk;
 - no unrelated cleanup, archiving, or doctrine promotion is bundled into the failure repair.

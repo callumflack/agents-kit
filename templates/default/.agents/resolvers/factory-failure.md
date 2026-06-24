@@ -71,6 +71,21 @@ Agent-process failure:
 
 Agent-process failure requires a learning. The log records what happened; the learning states what future agents must do differently. If the miss must be mechanically prevented, also patch the narrow live owner surface.
 
+## Friction Promotion Shape
+
+When friction repeats or costs enough to become a guardrail, name:
+
+```text
+Miss:
+Repeated or expensive:
+Live owner surface:
+Smallest constraint:
+Nearest oracle:
+Where this does not apply:
+```
+
+Use this as a diagnostic shape, not a second workflow. It clarifies the repair loop before choosing the live owner surface.
+
 ## Repair Loop
 
 Run this loop when classification selects a live owner surface.
@@ -122,7 +137,7 @@ Promotion states:
 | State | Meaning | Required action |
 | --- | --- | --- |
 | no-learning | Run-specific evidence only | keep in normal history/logs; do not create `history/lessons/*` |
-| context-only | Useful future context, but no mandatory behavior change | write or update `history/lessons/*` with the reason it is context-only |
+| context-only | Useful future context, but no mandatory behavior change | write or update `history/lessons/*` with the reason it is context-only. A context-only lesson must name its consult path — the specific resolver Required Reads line or skill that will surface it on its Applies When route; if no live surface will ever read it, the correct state is live-promotion or HITL, not context-only |
 | live-promotion | Future behavior must change | patch router, resolver, gate, skill, or mechanical check; update the lesson note if one exists |
 | HITL | Promotion owner or desired behavior is unclear | record the blocker and do not silently create law |
 
