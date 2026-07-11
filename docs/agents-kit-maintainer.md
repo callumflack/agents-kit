@@ -30,11 +30,14 @@ It may mention:
 - `.agents/resolvers/*`
 - `.agents/gates/*`
 - `.agents/skills/*`
+- `.agents/skills/manifest.json`
 - `.agents/logs/*`
 - `history/*`
 - `skills-lock.json`
 - `python3 .agents/skills/agents-kit/scripts/check-skill-frontmatter.py "$PWD/.agents/skills/<name>/SKILL.md"`
 - `python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py`
+
+It should stay procedural and point to the installed router, control-plane doctrine, resolver, and gate rather than repeat their placement maps.
 
 It must not mention:
 

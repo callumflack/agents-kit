@@ -48,6 +48,7 @@ The two integrity decisions are implemented and covered by the source verificati
 
 - The package verifier rejects conflict markers by inspecting shipped template content, and a negative self-test proves that rejection. `git diff --check` remains an independent maintainer oracle.
 - The seed declares `agents-kit` ownership in `.agents/skills/manifest.json` without inventing imported skills or hashes. The health checker validates schema, owner overlap, orphan hashes, declared skill presence, and materialized directory ownership; the installer treats the exact manifest path as review-only.
+- The shipped `agents-kit` operator skill is rinsed to a short installed-repo procedure: find the nearest owner, inspect dirty state plus both skill ownership records, state the canonical five-field receipt, and run frontmatter and health gates without repeating the control-plane placement map.
 
 ## Codebase Comparison Result
 

@@ -1,100 +1,57 @@
 ---
 name: agents-kit
-description: "Use when editing or reviewing this repo's installed .agents control plane, agents-kit bundled health scripts, or repo-local agent doctrine."
+description: "Use when editing or reviewing this repo's installed .agents control plane, bundled health scripts, or repo-local agent doctrine."
 ---
 
 # Agents Kit
 
-Maintain this repo's installed `.agents` control plane. Keep this skill procedural. If a rule belongs in the router, resolver, gate, doctrine, script, log, or history, patch that owner instead.
+Maintain this repo's installed `.agents` control plane. Use the nearest live owner; do not duplicate its law here.
 
-## Scope
+## Orient
 
-Use the nearest live source:
-
-1. `AGENTS.md` boots the local instructions.
-2. `.agents/router.md` owns task routing.
-3. `.agents/resolvers/*` owns scope, reads, writes, owners, and non-goals.
-4. `.agents/gates/*` owns done checks.
-5. `.agents/commands/*` owns executable hop-collapsers.
-6. `.agents/checks/*` owns objective pass/fail oracles.
-7. `.agents/skills/*` owns repeatable technique.
-8. `.agents/logs/*` owns handoff notes, not live law.
-9. `history/*` owns dated evidence, not current law.
-10. `skills-lock.json` records installed skill mirrors.
-
-## Modes
-
-- Control-plane edit: change the narrowest `.agents/**`, `AGENTS.md`, `skills-lock.json`, or `history/*` owner surface.
-- Command/check edit: change `.agents/commands/*` only for repeated hop-collapsers; change `.agents/checks/*` only for objective oracles the repo can observe.
-- Skill edit: change `.agents/skills/<name>/SKILL.md` only after checking `skills-lock.json` and the existing skill directory.
-- Health-script edit: change `.agents/skills/agents-kit/scripts/*`; run the local health gate.
-- Read-only assessment: inspect live files, name owner and oracle, then report without edits.
+1. Read `AGENTS.md`, `.agents/router.md`, and the routed resolver and gate.
+2. Read `.agents/AGENT-CONTROL-PLANE.md` for placement or doctrine changes and `.agents/resolvers/agent-tooling.md` for control-plane, skill, or delegated-agent work.
+3. Inspect the exact files you may change before editing.
 
 ## Before Editing
 
-State a compact ownership receipt before nontrivial edits:
+Inspect the working tree and both skill ownership records:
+
+```bash
+git status --short
+sed -n '1,240p' .agents/skills/manifest.json
+sed -n '1,240p' skills-lock.json
+```
+
+Keep unrelated dirty files untouched. State the canonical receipt:
 
 ```text
-Request:
-Mode:
-Source of truth / evidence order:
 Owner surface:
 Allowed writes:
 Forbidden surfaces:
 Done gate:
-First oracle:
-Next oracle:
+First real check:
 ```
 
-Check `git status --short` first. Keep unrelated dirty files untouched. Stage explicit paths only.
+## Skill Ownership
 
-## Placement Test
+- Seed-owned skills are declared with `"ownership": "seed"` in `.agents/skills/manifest.json`; preserve their generic target-repo contract.
+- Repo-owned skills are declared with `"ownership": "repo"`; edit them only for reusable repo technique.
+- Imported skills are recorded in `skills-lock.json`; treat their directories as mirrors and refresh them through their owning source.
+- Manifest declarations and lock entries must be disjoint and must account for every materialized skill directory.
+- Before changing any skill, inspect its directory and any named source instructions as well as both ownership records.
 
-Put instructions where they act.
+Put target-local operating law in the routed owner. Do not hide routing or done rules inside a skill. Do not use bundled health scripts for product work or repo checks.
 
-| If it answers... | Put it in... |
-| --- | --- |
-| What task route applies? | `.agents/router.md` |
-| What scope, reads, writes, and non-goals apply? | `.agents/resolvers/*` |
-| What proves done? | `.agents/gates/*` |
-| What repeated hop should be collapsed? | `.agents/commands/*` |
-| What objective oracle returns pass/fail? | `.agents/checks/*` |
-| What repeatable method helps? | `.agents/skills/*` |
-| What objective control-plane invariant needs checking? | `.agents/skills/agents-kit/scripts/*` |
-| What happened this run? | `.agents/logs/*` |
-| What dated evidence exists? | `history/*` |
+## Verify
 
-Do not duplicate full control-plane doctrine in this skill. Delegated subagent choreography belongs in `.agents/resolvers/agent-tooling.md` unless a real transcript or tool-call oracle exists; only then promote the narrow invariant to `.agents/checks/*`.
-
-## Skill Boundary
-
-Before adding or changing a skill, inspect `skills-lock.json`, the existing skill directory, and any user-provided install command or upstream docs.
-
-- Treat `.agents/skills/agents-kit/**` as seed-managed whether or not it appears in `skills-lock.json`. Do not edit it for target-local behavior unless the user deliberately forks it.
-- Put target-local doctrine in the router, resolver, gate, docs, logs, or history.
-- If another skill is listed in `skills-lock.json`, treat it as an installed mirror. Do not hand-edit it for local behavior repair.
-- If another skill comes from upstream docs or an external source, refresh it through that source's documented command and keep `skills-lock.json` in sync; do not hand-edit the mirror for local behavior repair.
-- Hand-author a skill only when it is explicitly local-only repo technique.
-
-For local-only skill authoring or edits, run:
+Run edited skill frontmatter and installed control-plane health checks:
 
 ```bash
 python3 .agents/skills/agents-kit/scripts/check-skill-frontmatter.py "$PWD/.agents/skills/<name>/SKILL.md"
-```
-
-## Gates
-
-Run the narrowest real gate that matches the change:
-
-```bash
-python3 .agents/skills/agents-kit/scripts/check-skill-frontmatter.py "$PWD/.agents/skills/agents-kit/SKILL.md"
 python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py
 ```
 
-## Do Not Reintroduce
+Run the routed gate's narrower product, docs, or repository oracle when the task requires one. If a check cannot run, report why and keep the residual risk visible.
 
-- `.agents/active-work.md`
-- `.agents/current-work.md`
-- `history/solutions/`
-- `history/learnings/`
-- product task runners, dashboard sync, or app workflow state under `.agents/skills/agents-kit/scripts/`
+Do not reintroduce current-focus or build-loop state under `.agents`, old learning or solution directories in place of `history/lessons/`, product runners or workflow state under bundled health scripts, or duplicated control-plane doctrine in this skill.
