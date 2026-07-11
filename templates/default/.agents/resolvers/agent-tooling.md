@@ -14,7 +14,7 @@ Use for `AGENTS.md`, `.agents/**`, `.scratch/**`, docs or tracker setup, skills,
 - relevant skill, docs, tracker, scratch, or host directory
 - relevant `.agents/commands/*` or `.agents/checks/*` file when changing commands or checks
 - `history/lessons/README.md` when changing lesson-artifact shape
-- `skills-lock.json` when skill inventory changes
+- `.agents/skills/manifest.json` and `skills-lock.json` when skill inventory changes
 
 ## Pre-Edit Ownership Receipt
 
@@ -36,14 +36,14 @@ The receipt does not replace `.agents/logs/`. If durable control-plane or log do
 
 Before creating, installing, editing, or routing to a repo skill, identify the source of truth:
 
-1. inspect `skills-lock.json`;
+1. inspect `.agents/skills/manifest.json` and `skills-lock.json`;
 2. inspect the existing `.agents/skills/<name>/` directory if it exists;
 3. inspect the user-provided install command or upstream skill docs when the user names one;
 4. only then patch router, resolver, gate, skill, or learning surfaces.
 
 If the skill is third-party or the user provides an install command, use that installer and let it update `.agents/skills/*` and `skills-lock.json`. Do not hand-author a mirror.
 
-Hand-author `.agents/skills/<name>/` only when the task is explicitly to create a new local-only repo skill. Record that local-only decision in the session log.
+Hand-author `.agents/skills/<name>/` only when the task is explicitly to create repo technique, and declare its ownership in `.agents/skills/manifest.json` in the same change.
 
 When hand-authoring or editing a local-only repo skill, run:
 
@@ -53,7 +53,7 @@ python3 .agents/skills/agents-kit/scripts/check-skill-frontmatter.py .agents/ski
 
 ## Skill Edit Boundary
 
-If a repo-local skill is listed in `skills-lock.json`, treat it as an installed mirror. Do not edit that skill or files under its skill directory for local behavior repair unless the user explicitly asks to change that installed skill. Put local operating rules in the narrow live resolver, gate, log doctrine, history learning, or product docs instead.
+If a skill is listed in `skills-lock.json`, treat it as an installed mirror. Do not edit that skill or files under its skill directory for local behavior repair unless the user explicitly asks to change that installed skill. Put local operating rules in the narrow live resolver, gate, manifest-declared wrapper, history learning, or product docs instead.
 
 ## Delegated Subagent Work
 
@@ -85,6 +85,7 @@ This does not apply to user-owned external threads; those follow the host thread
 - `history/lessons/**`;
 - host-specific agent mirrors when intended;
 - `skills-lock.json`;
+- `.agents/skills/manifest.json`;
 - `.gitignore` for local-only agent directories.
 
 ## Non-Goals
@@ -117,6 +118,7 @@ Given "run a subagent to review tests", the parent spawns one worker, reports it
 
 ## Failure Signs
 
+- skill ownership is absent from `.agents/skills/manifest.json` or overlaps `skills-lock.json`;
 - third-party skills are hand-authored under `.agents/skills/*` instead of installed through the repo skill manager;
 - installed skill mirrors listed in `skills-lock.json` are patched for local doctrine instead of the owning resolver, gate, docs, or learning surface;
 - `AGENTS.md` grows into a handbook;

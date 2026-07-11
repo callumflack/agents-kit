@@ -33,7 +33,7 @@ AGENTS.md
   mechanical pass/fail oracles for agent-process or repo-ownership invariants
 
 .agents/skills/
-  repo-local techniques loaded only when routed
+  repo-declared techniques plus installed dependency bodies; manifest + lock own provenance
 
 .agents/skills/agents-kit/scripts/
   control-plane health checks only

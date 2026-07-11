@@ -6,7 +6,7 @@ A portable seed for a repo-local `.agents` control plane.
 
 Use it as a seed: install the template into a target repo, review the diff, and localize it there.
 
-Treat this repo as a quarry: take the control-plane pieces that fit, but do not make `agents-kit` a runtime dependency. After install, the target repo owns local doctrine; `.agents/skills/agents-kit/**` stays seed-managed unless deliberately forked.
+Treat this repo as a quarry: take the control-plane pieces that fit, but do not make `agents-kit` a runtime dependency. After install, the target repo owns local doctrine; `.agents/skills/manifest.json` declares skill ownership, and `.agents/skills/agents-kit/**` stays seed-managed unless deliberately forked.
 
 For a visual walkthrough of the harness, open [dot-agents-system.html](dot-agents-system.html).
 
@@ -117,6 +117,7 @@ skills-lock.json
     README.md
   skills/
     README.md
+    manifest.json
     agents-kit/
       SKILL.md
       scripts/
@@ -141,6 +142,7 @@ During `update`, these files are review-only and are not overwritten:
 ```text
 AGENTS.md
 skills-lock.json
+.agents/skills/manifest.json
 .agents/AGENT-CONTROL-PLANE.md
 .agents/router.md
 .agents/resolvers/*
@@ -180,4 +182,4 @@ In an installed target repo:
 python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py
 ```
 
-The source verifier checks the transported template file list and runs the installed health check against `templates/default`.
+The source verifier self-test proves a clean template passes and rejects conflict markers and invalid skill ownership. The verifier then checks the transported template file list and runs the installed health check against `templates/default`. Pass `--root <template-root>` to verify a copied template through the same entrypoint.

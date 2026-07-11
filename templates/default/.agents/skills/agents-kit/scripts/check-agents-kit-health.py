@@ -137,35 +137,113 @@ def check_skills(errors: list[str]) -> None:
             fail(errors, f"{rel(skill_md)} missing description")
 
 
-def locked_skill_paths(errors: list[str]) -> dict[str, str]:
-    lock_path = ROOT / "skills-lock.json"
+def read_json_object(errors: list[str], path: str) -> dict[str, object]:
+    target = ROOT / path
     try:
-        lock = json.loads(lock_path.read_text())
+        value = json.loads(target.read_text())
     except FileNotFoundError:
-        fail(errors, "missing file: skills-lock.json")
+        fail(errors, f"missing file: {path}")
         return {}
     except json.JSONDecodeError as error:
-        fail(errors, f"skills-lock.json is invalid JSON: {error}")
+        fail(errors, f"{path} is invalid JSON: {error}")
         return {}
+    if not isinstance(value, dict):
+        fail(errors, f"{path} must contain a JSON object")
+        return {}
+    return value
+
+
+def locked_skill_paths(errors: list[str], lock_path: str) -> dict[str, str]:
+    lock = read_json_object(errors, lock_path)
 
     skills = lock.get("skills")
     if not isinstance(skills, dict):
-        fail(errors, "skills-lock.json missing skills object")
+        fail(errors, f"{lock_path} missing skills object")
         return {}
 
     locked: dict[str, str] = {}
     for name, metadata in skills.items():
         if not isinstance(metadata, dict):
-            fail(errors, f"skills-lock.json entry is not an object: {name}")
+            fail(errors, f"{lock_path} entry is not an object: {name}")
             continue
         local_path = metadata.get("localPath") or f".agents/skills/{name}/SKILL.md"
+        if not isinstance(local_path, str):
+            fail(errors, f"{lock_path} localPath is not a string: {name}")
+            continue
+        computed_hash = metadata.get("computedHash")
+        if not isinstance(computed_hash, str) or re.fullmatch(r"[0-9a-f]{64}", computed_hash) is None:
+            fail(errors, f"{lock_path} computedHash is not 64 lowercase hex: {name}")
         locked[name] = local_path
     return locked
 
 
+def repo_skill_manifest(
+    errors: list[str],
+) -> tuple[dict[str, object], dict[str, str], str]:
+    path = ".agents/skills/manifest.json"
+    manifest = read_json_object(errors, path)
+
+    if manifest.get("version") != 1:
+        fail(errors, f"{path} version must be 1")
+
+    external_lock = manifest.get("externalLock")
+    if external_lock != "skills-lock.json":
+        fail(errors, f"{path} externalLock must be skills-lock.json")
+        external_lock = "skills-lock.json"
+
+    resolution = manifest.get("resolution")
+    expected_resolution = {
+        "repoDeclaredWins": True,
+        "globalFallback": "undeclared-only",
+        "externalBodies": "tracked-until-immutable-ref",
+    }
+    if not isinstance(resolution, dict):
+        fail(errors, f"{path} missing resolution object")
+    else:
+        for key, expected in expected_resolution.items():
+            if resolution.get(key) != expected:
+                fail(errors, f"{path} resolution.{key} must be {json.dumps(expected)}")
+
+    materialized = manifest.get("materializedImports")
+    hashes: dict[str, str] = {}
+    if not isinstance(materialized, dict):
+        fail(errors, f"{path} missing materializedImports object")
+    else:
+        if materialized.get("algorithm") != "sha256-path-content-v1":
+            fail(errors, f"{path} materializedImports.algorithm must be sha256-path-content-v1")
+        raw_hashes = materialized.get("hashes")
+        if not isinstance(raw_hashes, dict):
+            fail(errors, f"{path} materializedImports missing hashes object")
+        else:
+            for name, value in raw_hashes.items():
+                if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+                    fail(errors, f"{path} materialization hash is not sha256 hex: {name}")
+                    continue
+                hashes[name] = value
+
+    repo_skills = manifest.get("repoSkills")
+    if not isinstance(repo_skills, dict):
+        fail(errors, f"{path} missing repoSkills object")
+        repo_skills = {}
+    else:
+        for name, metadata in repo_skills.items():
+            if not isinstance(metadata, dict):
+                fail(errors, f"{path} repoSkills entry is not an object: {name}")
+                continue
+            if metadata.get("ownership") not in {"seed", "repo", "adopted"}:
+                fail(errors, f"{path} repoSkills ownership is invalid: {name}")
+
+    agents_kit = repo_skills.get("agents-kit")
+    if not isinstance(agents_kit, dict) or agents_kit.get("ownership") != "seed":
+        fail(errors, f"{path} repoSkills.agents-kit ownership must be seed")
+
+    return repo_skills, hashes, external_lock
+
+
 def check_skill_inventory(errors: list[str]) -> None:
     skills_root = ROOT / ".agents" / "skills"
-    locked = locked_skill_paths(errors)
+    repo_skills, hashes, external_lock = repo_skill_manifest(errors)
+    locked = locked_skill_paths(errors, external_lock)
     if not skills_root.is_dir():
         return
 
@@ -178,28 +256,27 @@ def check_skill_inventory(errors: list[str]) -> None:
     for name, local_path in sorted(locked.items()):
         if not (ROOT / local_path).is_file():
             fail(errors, f"locked skill missing localPath: {name} -> {local_path}")
+        if name not in hashes:
+            fail(errors, f"externally locked skill missing materialization hash: {name}")
 
-    log_lines = "\n".join(
-        read(path)
-        for path in sorted((ROOT / ".agents" / "logs").glob("*.md"))
-    ).splitlines()
+    for name in sorted(set(repo_skills) & set(locked)):
+        fail(errors, f"skill is both repo-declared and externally locked: {name}")
+
+    for name in sorted(repo_skills):
+        if not (skills_root / name / "SKILL.md").is_file():
+            fail(errors, f"repo-declared skill missing SKILL.md: .agents/skills/{name}")
+
+    for name in sorted(hashes):
+        if name not in locked:
+            fail(errors, f"materialization hash has no externally locked skill: {name}")
+        elif name not in skill_dirs:
+            fail(errors, f"materialization hash has no local skill directory: {name}")
 
     for name in sorted(skill_dirs):
-        if name in locked:
-            continue
-        if name == "agents-kit":
-            continue
-        local_only_line = False
-        for line in log_lines:
-            if re.search(r"\blocal[- ]only\b", line, re.IGNORECASE) and re.search(
-                rf"`?{re.escape(name)}`?", line
-            ):
-                local_only_line = True
-                break
-        if not local_only_line:
+        if name not in locked and name not in repo_skills:
             fail(
                 errors,
-                f"unlocked skill lacks local-only log evidence: .agents/skills/{name}",
+                f"skill has no manifest owner: .agents/skills/{name}",
             )
 
 

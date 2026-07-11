@@ -187,7 +187,9 @@ line of the opening boundary block or the final line before the artifact:
 `Skill used: .agents/skills/<name>/SKILL.md`. Omit the line when no skill
 materially shaped the response.
 
-Installed skills are supply-chain artifacts. Before a skill is added or changed, resolve its owner: `skills-lock.json`, the existing skill directory, and any user-provided install command or upstream docs. If the skill has an upstream installer, use it. Hand-authored skills are for local-only repo technique, and the session log must say that explicitly.
+Skill provenance is explicit: `.agents/skills/manifest.json` owns repo and seed skills plus versioned local materialization hashes; `skills-lock.json` owns installer import metadata, whose `computedHash` remains opaque. The owner sets are disjoint, repo declarations win over same-name global skills, and global fallback applies only to undeclared skills. Before changing a skill, inspect both ownership files and its directory. A materialization hash proves local snapshot integrity, not upstream provenance.
+
+Imported bodies remain tracked until an immutable upstream reference can restore the same materialized bytes. If a skill has an upstream installer, use it. Hand-authored skills are for repo technique and must be declared in `.agents/skills/manifest.json`.
 
 Generic skill design is a baseline, not the repo-local control-plane rule. `skill-creator` teaches skill packaging. `.agents/skills/agents-kit` teaches safe surgery on this repo's router, resolvers, gates, skills, logs, history, and lessons.
 

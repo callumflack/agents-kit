@@ -13,7 +13,7 @@
     "README.md"
   ],
   "scripts": {
-    "verify": "node scripts/verify-template.mjs",
+    "verify": "node scripts/test-verify-template.mjs && node scripts/verify-template.mjs",
     "check": "npm run verify"
   }
 }

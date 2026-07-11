@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "externalLock": "skills-lock.json",
+  "resolution": {
+    "repoDeclaredWins": true,
+    "globalFallback": "undeclared-only",
+    "externalBodies": "tracked-until-immutable-ref"
+  },
+  "materializedImports": {
+    "algorithm": "sha256-path-content-v1",
+    "hashes": {}
+  },
+  "repoSkills": {
+    "agents-kit": {
+      "ownership": "seed"
+    }
+  }
+}

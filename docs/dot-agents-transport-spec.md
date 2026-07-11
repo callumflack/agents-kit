@@ -42,12 +42,12 @@ Comparing Unity history and the current `agents-kit` template gives this transpo
 | `dfbec319` | Consolidates command/check/gate authority and retires stale lanes. | Ported: commands/checks surfaces, health coverage, and agent-tooling-owned quality passes. |
 | `aa3dd514` | Adds delegated subagent flow to `agent-tooling`. | Ported: resolver rule and check-promotion condition. |
 | `32845c27` | Thins and hardens the Unity control plane after the rinse. | Use as the live comparison point for the portable spine. Keep the five-field receipt, fail-closed proof expectations, and generic lanes; reject Unity product surfaces, roles, loops, hooks, logs, lesson bodies, and installed-skill inventory. |
-| `2a7e7645` | Separates repo-owned materialization hashes from installer-owned import metadata. | Adopt the ownership split without fake provenance: a seed manifest declares `agents-kit` and an empty versioned materialization map; `skills-lock.json` remains the import-metadata owner. Implementation and verification remain part of this refactor's done gate. |
+| `2a7e7645` | Separates repo-owned materialization hashes from installer-owned import metadata. | Adopted without fake provenance: the seed manifest declares `agents-kit` and an empty versioned materialization map; `skills-lock.json` remains the import-metadata owner. The health check proves the split without interpreting installer `computedHash`. |
 
-Two integrity decisions remain required before this transport is complete:
+The two integrity decisions are implemented and covered by the source verification gate:
 
-- The package verifier must reject conflict markers by inspecting shipped template content, and a negative self-test must prove that rejection. `git diff --check` remains an independent maintainer oracle.
-- The seed must declare skill ownership in `.agents/skills/manifest.json` without inventing imported skills or hashes. The health checker and installer review-only behavior must validate that contract before the manifest decision can be recorded as implemented.
+- The package verifier rejects conflict markers by inspecting shipped template content, and a negative self-test proves that rejection. `git diff --check` remains an independent maintainer oracle.
+- The seed declares `agents-kit` ownership in `.agents/skills/manifest.json` without inventing imported skills or hashes. The health checker validates schema, owner overlap, orphan hashes, declared skill presence, and materialized directory ownership; the installer treats the exact manifest path as review-only.
 
 ## Codebase Comparison Result
 
@@ -214,6 +214,7 @@ templates/default/
       README.md
     skills/
       README.md
+      manifest.json
       agents-kit/
         SKILL.md
         scripts/

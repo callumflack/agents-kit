@@ -79,6 +79,7 @@ function parseArgs(argv) {
 function isReviewOnly(file) {
   return file === "AGENTS.md" ||
     file === "skills-lock.json" ||
+    file === ".agents/skills/manifest.json" ||
     file === ".agents/AGENT-CONTROL-PLANE.md" ||
     file === ".agents/router.md" ||
     file.startsWith(".agents/resolvers/") ||

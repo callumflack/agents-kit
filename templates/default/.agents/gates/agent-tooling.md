@@ -6,10 +6,10 @@ Done means:
 - nontrivial edits used the canonical five-field ownership receipt from `.agents/AGENT-CONTROL-PLANE.md`; evidence order or a next oracle was added only when the task required it;
 - `python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py` passes when router, resolver, gate, command, check, skill, or lesson-artifact structure changes;
 - captured lesson artifacts live under `history/lessons/`, not `.agents/`;
-- `skills-lock.json` matches the intended installed skill set;
-- skill inventory changes prove source-of-truth lookup happened before edits: `skills-lock.json`, existing `.agents/skills/<name>/`, and any user-provided install command or upstream docs were checked;
+- `.agents/skills/manifest.json`, `skills-lock.json`, and materialized skill directories have disjoint, complete ownership;
+- skill inventory changes prove source-of-truth lookup happened before edits: both ownership files, existing `.agents/skills/<name>/`, and any user-provided install command or upstream docs were checked;
 - third-party skills are installed with the repo skill manager, not hand-authored under `.agents/skills/*`;
-- hand-authored `.agents/skills/<name>/` additions are explicitly logged as local-only skills;
+- hand-authored `.agents/skills/<name>/` additions are declared as repo-owned skills;
 - hand-authored or edited local-only skills pass `python3 .agents/skills/agents-kit/scripts/check-skill-frontmatter.py .agents/skills/<name>/SKILL.md`;
 - `AGENTS.md` stays short and points to `.agents/`;
 - touched `history/lessons/*` notes have valid shape and promotion-state metadata;
