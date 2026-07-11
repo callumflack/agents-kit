@@ -60,7 +60,7 @@ Use `adopt` when a repo already has local agent files.
 npx github:callumflack/agents-kit adopt --target /path/to/repo
 ```
 
-`adopt` creates missing seed files only. Existing local files are reported as `keep local`; differing files get review diffs. Merge useful seed doctrine manually.
+`adopt` creates missing seed files only. Existing local files are reported as `keep local`; differing files get review diffs. Merge useful seed doctrine manually. If an older target has imported or materialized skills but no `.agents/skills/manifest.json`, `adopt` refuses to invent owners or materialization hashes; create and verify the manifest explicitly first.
 
 ### Update
 
@@ -70,7 +70,7 @@ Use `update` to roll an existing installation forward from this seed.
 npx github:callumflack/agents-kit update --target /path/to/repo
 ```
 
-`update` requires a clean target git worktree before writing. It creates missing files, keeps local doctrine by default, and prints review diffs for changed files.
+`update` requires a clean target git worktree before writing. It creates missing files, keeps local doctrine by default, and prints review diffs for changed files. The same fail-closed manifest preflight protects older skill inventories.
 
 Replace changed non-doctrine seed files:
 
@@ -123,6 +123,7 @@ skills-lock.json
       scripts/
         check-agents-kit-health.py
         check-skill-frontmatter.py
+        hash-materialized-skill.mjs
   logs/
     README.md
 .scratch/
@@ -182,4 +183,4 @@ In an installed target repo:
 python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py
 ```
 
-The source verifier self-test proves a clean template passes and rejects conflict markers and invalid skill ownership. The verifier then checks the transported template file list and runs the installed health check against `templates/default`. Pass `--root <template-root>` to verify a copied template through the same entrypoint.
+The source verifier self-tests prove clean installation and template health, legacy-upgrade refusal, conflict-marker rejection, shipped seed ownership, generic installed ownership, path confinement, and materialized-import hashes. The verifier then checks the transported template file list and runs the installed health check against `templates/default`. Pass `--root <template-root>` to verify a copied template through the same entrypoint.

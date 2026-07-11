@@ -7,6 +7,7 @@ Done means:
 - `python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py` passes when router, resolver, gate, command, check, skill, or lesson-artifact structure changes;
 - captured lesson artifacts live under `history/lessons/`, not `.agents/`;
 - `.agents/skills/manifest.json`, `skills-lock.json`, and materialized skill directories have disjoint, complete ownership;
+- imported skill materialization hashes match `sha256-path-content-v1`, and locked `localPath` values remain inside the repo;
 - skill inventory changes prove source-of-truth lookup happened before edits: both ownership files, existing `.agents/skills/<name>/`, and any user-provided install command or upstream docs were checked;
 - third-party skills are installed with the repo skill manager, not hand-authored under `.agents/skills/*`;
 - hand-authored `.agents/skills/<name>/` additions are declared as repo-owned skills;

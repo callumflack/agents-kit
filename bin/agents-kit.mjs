@@ -126,6 +126,47 @@ async function sameFile(source, target) {
   }
 }
 
+async function assertManifestUpgradeSafe(targetRoot) {
+  const manifestPath = path.join(targetRoot, ".agents", "skills", "manifest.json")
+  if (await exists(manifestPath)) return
+
+  const lockPath = path.join(targetRoot, "skills-lock.json")
+  let lockedNames = []
+  if (await exists(lockPath)) {
+    let lock
+    try {
+      lock = JSON.parse(await fs.readFile(lockPath, "utf8"))
+    } catch (error) {
+      throw new Error(`cannot inspect legacy skills-lock.json: ${error.message}`)
+    }
+    if (!lock?.skills || typeof lock.skills !== "object" || Array.isArray(lock.skills)) {
+      throw new Error("cannot inspect legacy skills-lock.json: missing skills object")
+    }
+    lockedNames = Object.keys(lock.skills)
+  }
+
+  const skillsRoot = path.join(targetRoot, ".agents", "skills")
+  let materializedNames = []
+  try {
+    const entries = await fs.readdir(skillsRoot, { withFileTypes: true })
+    materializedNames = entries
+      .filter((entry) => (entry.isDirectory() || entry.isSymbolicLink()) && entry.name !== "agents-kit")
+      .map((entry) => entry.name)
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error
+  }
+
+  if (lockedNames.length === 0 && materializedNames.length === 0) return
+
+  const details = []
+  if (lockedNames.length > 0) details.push(`locked imports: ${lockedNames.sort().join(", ")}`)
+  if (materializedNames.length > 0) details.push(`materialized skill directories: ${materializedNames.sort().join(", ")}`)
+  throw new Error(
+    `refusing to create .agents/skills/manifest.json in an existing skill inventory (${details.join("; ")}). ` +
+    "The installer will not infer ownership or materialization hashes. Create and verify the manifest explicitly, then rerun.",
+  )
+}
+
 function printDiff(source, target, file) {
   const diff = spawnSync("diff", [
     "-u",
@@ -249,6 +290,7 @@ async function adopt(options) {
   }
 
   const targetRoot = path.resolve(options.target)
+  await assertManifestUpgradeSafe(targetRoot)
   const files = await listFiles(templateRoot)
   const skipped = []
 
@@ -295,6 +337,7 @@ async function adopt(options) {
 async function update(options) {
   const targetRoot = path.resolve(options.target)
   assertCleanWorktree(targetRoot, options)
+  await assertManifestUpgradeSafe(targetRoot)
 
   const files = await listFiles(templateRoot)
   const changed = []

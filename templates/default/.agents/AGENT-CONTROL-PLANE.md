@@ -189,7 +189,7 @@ materially shaped the response.
 
 Skill provenance is explicit: `.agents/skills/manifest.json` owns repo and seed skills plus versioned local materialization hashes; `skills-lock.json` owns installer import metadata, whose `computedHash` remains opaque. The owner sets are disjoint, repo declarations win over same-name global skills, and global fallback applies only to undeclared skills. Before changing a skill, inspect both ownership files and its directory. A materialization hash proves local snapshot integrity, not upstream provenance.
 
-Imported bodies remain tracked until an immutable upstream reference can restore the same materialized bytes. If a skill has an upstream installer, use it. Hand-authored skills are for repo technique and must be declared in `.agents/skills/manifest.json`.
+Imported bodies remain tracked until an immutable upstream reference can restore the same materialized bytes. `sha256-path-content-v1` recursively hashes regular files except `.git` and `node_modules`, ordered by POSIX-relative path, feeding each path then its raw bytes with no separator; health recomputes it and rejects drift. If a skill has an upstream installer, use it. Hand-authored skills are for repo technique and must be declared in `.agents/skills/manifest.json`.
 
 Generic skill design is a baseline, not the repo-local control-plane rule. `skill-creator` teaches skill packaging. `.agents/skills/agents-kit` teaches safe surgery on this repo's router, resolvers, gates, skills, logs, history, and lessons.
 

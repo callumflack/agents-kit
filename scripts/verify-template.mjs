@@ -35,6 +35,7 @@ const requiredFiles = [
   ".agents/skills/agents-kit/SKILL.md",
   ".agents/skills/agents-kit/scripts/check-agents-kit-health.py",
   ".agents/skills/agents-kit/scripts/check-skill-frontmatter.py",
+  ".agents/skills/agents-kit/scripts/hash-materialized-skill.mjs",
   ".agents/logs/README.md",
   ".scratch/README.md",
   "history/README.md",
@@ -90,6 +91,13 @@ if (conflicts.length > 0) {
   for (const { file, marker } of conflicts) {
     console.error(`- conflict marker ${marker} in ${file}`)
   }
+  process.exit(1)
+}
+
+const manifestPath = path.join(templateRoot, ".agents/skills/manifest.json")
+const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"))
+if (manifest.repoSkills?.["agents-kit"]?.ownership !== "seed") {
+  console.error("Shipped template manifest must declare agents-kit ownership seed")
   process.exit(1)
 }
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 import sys
 import json
+import subprocess
 from pathlib import Path
 
 
@@ -170,6 +171,12 @@ def locked_skill_paths(errors: list[str], lock_path: str) -> dict[str, str]:
         if not isinstance(local_path, str):
             fail(errors, f"{lock_path} localPath is not a string: {name}")
             continue
+        resolved_path = (ROOT / local_path).resolve()
+        try:
+            resolved_path.relative_to(ROOT.resolve())
+        except ValueError:
+            fail(errors, f"{lock_path} localPath escapes repo root: {name} -> {local_path}")
+            continue
         computed_hash = metadata.get("computedHash")
         if not isinstance(computed_hash, str) or re.fullmatch(r"[0-9a-f]{64}", computed_hash) is None:
             fail(errors, f"{lock_path} computedHash is not 64 lowercase hex: {name}")
@@ -233,11 +240,27 @@ def repo_skill_manifest(
             if metadata.get("ownership") not in {"seed", "repo", "adopted"}:
                 fail(errors, f"{path} repoSkills ownership is invalid: {name}")
 
-    agents_kit = repo_skills.get("agents-kit")
-    if not isinstance(agents_kit, dict) or agents_kit.get("ownership") != "seed":
-        fail(errors, f"{path} repoSkills.agents-kit ownership must be seed")
-
     return repo_skills, hashes, external_lock
+
+
+def materialized_skill_hash(errors: list[str], name: str, directory: Path) -> str:
+    helper = ROOT / ".agents/skills/agents-kit/scripts/hash-materialized-skill.mjs"
+    try:
+        result = subprocess.run(
+            ["node", str(helper), str(directory)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as error:
+        fail(errors, f"could not hash materialized skill {name}: {error}")
+        return ""
+    actual = result.stdout.strip()
+    if result.returncode != 0 or re.fullmatch(r"[0-9a-f]{64}", actual) is None:
+        detail = result.stderr.strip() or f"invalid helper output: {actual}"
+        fail(errors, f"could not hash materialized skill {name}: {detail}")
+        return ""
+    return actual
 
 
 def check_skill_inventory(errors: list[str]) -> None:
@@ -271,6 +294,13 @@ def check_skill_inventory(errors: list[str]) -> None:
             fail(errors, f"materialization hash has no externally locked skill: {name}")
         elif name not in skill_dirs:
             fail(errors, f"materialization hash has no local skill directory: {name}")
+        else:
+            actual = materialized_skill_hash(errors, name, skill_dirs[name])
+            if actual and actual != hashes[name]:
+                fail(
+                    errors,
+                    f"materialized skill hash drift: {name} expected {hashes[name]} got {actual}",
+                )
 
     for name in sorted(skill_dirs):
         if name not in locked and name not in repo_skills:
@@ -286,6 +316,7 @@ def check_control_plane(errors: list[str]) -> None:
     require_file(errors, ".agents/AGENT-CONTROL-PLANE.md")
     require_file(errors, ".agents/commands/README.md")
     require_file(errors, ".agents/checks/README.md")
+    require_file(errors, ".agents/skills/agents-kit/scripts/hash-materialized-skill.mjs")
     require_file(errors, "history/lessons/README.md")
 
     agents_text = read(ROOT / "AGENTS.md")

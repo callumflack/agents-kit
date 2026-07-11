@@ -43,6 +43,8 @@ Before creating, installing, editing, or routing to a repo skill, identify the s
 
 If the skill is third-party or the user provides an install command, use that installer and let it update `.agents/skills/*` and `skills-lock.json`. Do not hand-author a mirror.
 
+When adopting or updating the control plane in an older repo, do not infer a missing manifest from existing lock entries or skill directories. Declare owners and independently derived materialization hashes explicitly before continuing.
+
 Hand-author `.agents/skills/<name>/` only when the task is explicitly to create repo technique, and declare its ownership in `.agents/skills/manifest.json` in the same change.
 
 When hand-authoring or editing a local-only repo skill, run:

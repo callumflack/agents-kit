@@ -47,7 +47,7 @@ Comparing Unity history and the current `agents-kit` template gives this transpo
 The two integrity decisions are implemented and covered by the source verification gate:
 
 - The package verifier rejects conflict markers by inspecting shipped template content, and a negative self-test proves that rejection. `git diff --check` remains an independent maintainer oracle.
-- The seed declares `agents-kit` ownership in `.agents/skills/manifest.json` without inventing imported skills or hashes. The health checker validates schema, owner overlap, orphan hashes, declared skill presence, and materialized directory ownership; the installer treats the exact manifest path as review-only.
+- The seed declares `agents-kit` ownership in `.agents/skills/manifest.json` without inventing imported skills or hashes. The source verifier enforces that seed default; installed health remains generic for deliberate forks and validates schema, owner overlap, confined lock paths, computed materialization hashes, declared skill presence, and materialized directory ownership. The installer treats the exact manifest path as review-only and refuses to infer a missing manifest for an existing skill inventory.
 - The shipped `agents-kit` operator skill is rinsed to a short installed-repo procedure: find the nearest owner, inspect dirty state plus both skill ownership records, state the canonical five-field receipt, and run frontmatter and health gates without repeating the control-plane placement map.
 
 ## Codebase Comparison Result
@@ -221,6 +221,7 @@ templates/default/
         scripts/
           check-agents-kit-health.py
           check-skill-frontmatter.py
+          hash-materialized-skill.mjs
     logs/
       README.md
   history/
@@ -333,7 +334,8 @@ Port these live concepts directly:
   - verify gates state done criteria;
   - verify gates and commands only name existing `.agents/checks/*` paths;
   - verify skill frontmatter;
-  - verify locked skill paths when `skills-lock.json` exists;
+  - verify locked skill paths stay inside the repo when `skills-lock.json` exists;
+  - compare every imported body with its `sha256-path-content-v1` materialization hash while treating installer `computedHash` as opaque metadata;
   - verify `AGENTS.md` remains short;
   - verify `history/lessons/README.md`;
   - fail if retired runtime state returns to `.agents`;
@@ -378,12 +380,14 @@ template.
 
 - never overwrites;
 - creates missing seed files;
+- refuses to create a missing skill manifest when lock imports or non-seed skill directories already exist;
 - prints compact review diffs for conflicting local files.
 
 `update`:
 
 - requires clean target worktree unless `--force`;
 - creates missing seed files;
+- refuses to create a missing skill manifest when lock imports or non-seed skill directories already exist;
 - keeps local doctrine by default;
 - supports `--overwrite` only for non-doctrine files;
 - prints compact review diffs for local doctrine.

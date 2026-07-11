@@ -9,6 +9,8 @@ import { fileURLToPath } from "node:url"
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const sourceRoot = path.join(repoRoot, "templates", "default")
 const verifier = path.join(repoRoot, "scripts", "verify-template.mjs")
+const importedSkillBody = "---\nname: imported\ndescription: fixture\n---\n"
+const importedMaterializedHash = "b7e73bd6ee8643f059062b27771430221472c1ede175fae683b176434b038122"
 
 async function withTemplate(run) {
   const parent = await fs.mkdtemp(path.join(os.tmpdir(), "agents-kit-verify-"))
@@ -24,6 +26,15 @@ async function withTemplate(run) {
 function verify(root) {
   return spawnSync(process.execPath, [verifier, "--root", root], {
     cwd: repoRoot,
+    encoding: "utf8",
+  })
+}
+
+function health(root) {
+  return spawnSync("python3", [
+    path.join(root, ".agents", "skills", "agents-kit", "scripts", "check-agents-kit-health.py"),
+  ], {
+    cwd: root,
     encoding: "utf8",
   })
 }
@@ -68,9 +79,11 @@ await withTemplate(async (root) => {
   const { manifestPath, manifest } = await readManifest(root)
   manifest.repoSkills["agents-kit"].ownership = "repo"
   await writeJson(manifestPath, manifest)
+  const installedResult = health(root)
+  assert.equal(installedResult.status, 0, output(installedResult))
   const result = verify(root)
-  assert.notEqual(result.status, 0, "agents-kit must remain seed-owned")
-  assert.match(output(result), /repoSkills\.agents-kit ownership must be seed/)
+  assert.notEqual(result.status, 0, "the shipped seed must keep agents-kit seed-owned")
+  assert.match(output(result), /Shipped template manifest must declare agents-kit ownership seed/)
 })
 
 await withTemplate(async (root) => {
@@ -103,7 +116,7 @@ await withTemplate(async (root) => {
 await withTemplate(async (root) => {
   const skillPath = path.join(root, ".agents", "skills", "imported", "SKILL.md")
   await fs.mkdir(path.dirname(skillPath), { recursive: true })
-  await fs.writeFile(skillPath, "---\nname: imported\ndescription: test fixture\n---\n")
+  await fs.writeFile(skillPath, importedSkillBody)
   await writeJson(path.join(root, "skills-lock.json"), {
     skills: {
       imported: {
@@ -120,7 +133,7 @@ await withTemplate(async (root) => {
 await withTemplate(async (root) => {
   const skillPath = path.join(root, ".agents", "skills", "imported", "SKILL.md")
   await fs.mkdir(path.dirname(skillPath), { recursive: true })
-  await fs.writeFile(skillPath, "---\nname: imported\ndescription: test fixture\n---\n")
+  await fs.writeFile(skillPath, importedSkillBody)
   await writeJson(path.join(root, "skills-lock.json"), {
     skills: {
       imported: {
@@ -135,6 +148,50 @@ await withTemplate(async (root) => {
   const result = verify(root)
   assert.notEqual(result.status, 0, "an invalid computedHash shape should fail")
   assert.match(output(result), /computedHash is not 64 lowercase hex: imported/)
+})
+
+await withTemplate(async (root) => {
+  const skillPath = path.join(root, ".agents", "skills", "imported", "SKILL.md")
+  await fs.mkdir(path.dirname(skillPath), { recursive: true })
+  await fs.writeFile(skillPath, importedSkillBody)
+  await writeJson(path.join(root, "skills-lock.json"), {
+    skills: {
+      imported: {
+        localPath: ".agents/skills/imported/SKILL.md",
+        computedHash: "e".repeat(64),
+      },
+    },
+  })
+  const { manifestPath, manifest } = await readManifest(root)
+  manifest.materializedImports.hashes.imported = importedMaterializedHash
+  await writeJson(manifestPath, manifest)
+  const result = verify(root)
+  assert.equal(result.status, 0, output(result))
+
+  await fs.appendFile(skillPath, "# drift\n")
+  const drift = verify(root)
+  assert.notEqual(drift.status, 0, "materialized import drift should fail")
+  assert.match(output(drift), /materialized skill hash drift: imported/)
+})
+
+await withTemplate(async (root) => {
+  const skillPath = path.join(root, ".agents", "skills", "imported", "SKILL.md")
+  await fs.mkdir(path.dirname(skillPath), { recursive: true })
+  await fs.writeFile(skillPath, importedSkillBody)
+  await writeJson(path.join(root, "skills-lock.json"), {
+    skills: {
+      imported: {
+        localPath: "../outside/SKILL.md",
+        computedHash: "f".repeat(64),
+      },
+    },
+  })
+  const { manifestPath, manifest } = await readManifest(root)
+  manifest.materializedImports.hashes.imported = importedMaterializedHash
+  await writeJson(manifestPath, manifest)
+  const result = verify(root)
+  assert.notEqual(result.status, 0, "a localPath outside the repo should fail")
+  assert.match(output(result), /localPath escapes repo root: imported -> \.\.\/outside\/SKILL\.md/)
 })
 
 await withTemplate(async (root) => {
