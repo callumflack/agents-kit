@@ -19,7 +19,7 @@ Done means:
   - no-op with reason;
 - the selected owner resolver and gate are run when a live surface is patched;
 - the factory-failure gate is run after the owner gate for live-owner repairs;
-- `python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py` passes when router, resolver, gate, skill, or learning structure changes;
+- `python3 .agents/skills/agents-kit/scripts/check-agents-kit-health.py` passes when router, resolver, gate, command, check, skill, or lesson-artifact structure changes;
 - the relevant repo-owned check passes when repairing task-state drift, or the remaining state blocker is recorded as HITL/blocker;
 - touched `history/lessons/*` notes record a promotion state: context-only, live-promotion, no-learning, or HITL;
 - live-promotion is done only when the original miss scenario is replayed as a cold-agent test against the patched surface, or the new mechanical check is shown failing on the pre-patch state, and the replay result is recorded in the lesson note (or the failure log when no lesson note exists);

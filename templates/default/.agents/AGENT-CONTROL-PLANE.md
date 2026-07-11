@@ -12,9 +12,34 @@ Add friction where silent agent drift is expensive. Remove friction where the re
 
 Compression makes the system loadable. Constraint makes it followable. Friction makes it honest.
 
+## Spine
+
+```text
+repeated friction -> owning surface -> smallest durable constraint -> nearest oracle
+```
+
+Promote only when the miss repeated, cost real time, the owner is known, and a nearby prompt, resolver, gate, command, check, hook, CI job, or package script would have prevented it.
+
+Do not centralize wisdom. Put the smallest rule where it acts.
+
 ## Rule of Thumb
 
 If a cold agent does not need it to orient, route, constrain scope, apply reusable technique, verify done, or resume handoff, it does not belong in `.agents`.
+
+## Public Model
+
+The public model is deliberately thin:
+
+```text
+agents judge
+commands collapse hops
+checks prove
+memory remembers
+```
+
+These are public words, not necessarily folders. Do not create `.agents/memory/`. Memory lives as `.agents/logs/*`, `history/lessons/*`, and other dated repo evidence.
+
+Router, resolvers, and gates are project adapters. Use them when a repo has real ownership hazards, expensive done conditions, or repeated wrong-surface misses.
 
 ## Shape
 
@@ -23,18 +48,20 @@ AGENTS.md              boot pointer into the live control plane
 .agents/router.md      task trigger -> resolver -> gate -> skill
 .agents/resolvers/     decision rules for task shape
 .agents/gates/         concrete done checks
+.agents/commands/      executable hop-collapsers for recurring hot paths
+.agents/checks/        agent-process and repo-ownership mechanical oracles
 .agents/skills/        repo-local techniques
 .agents/skills/agents-kit/scripts/
                        control-plane health checks only
 .agents/logs/          session notes and handoff context
 history/               dated evidence, audits, decisions
 history/plans/         completed plans
-history/lessons/     captured lesson artifacts; factory-failure owns the lifecycle
+history/lessons/       captured lesson artifacts; factory-failure owns the lifecycle
 ```
 
 `AGENTS.md` points. It does not teach. Boot happens at every new agent session, and the pointed-to `.agents/` files continue to govern the work after startup.
 
-Resolvers decide scope. Gates decide done. Skills hold technique. Logs orient resumption. History explains why something was once believed. Git proves commits and diffs. None of these should impersonate the others.
+Resolvers decide scope. Gates name done checks. Commands collapse repeated hops. Checks prove agent-process truth. Skills hold technique. Logs orient resumption. History explains why something was once believed. Git proves commits and diffs. None of these should impersonate the others.
 
 ## Authority Map
 
@@ -46,6 +73,8 @@ Every artifact is either live law, current app doctrine, active execution state,
 | `.agents/router.md` | routing law | classify the task, resolver, gate, and default skill |
 | `.agents/resolvers/*` | owner and scope law | own reads, allowed writes, non-goals, and cold-agent tests |
 | `.agents/gates/*` | done law | own observable checks before done is claimed |
+| `.agents/commands/*` | executable hop-collapsing entrypoints | run common workflows and call checks; do not hide ownership |
+| `.agents/checks/*` | mechanical oracle law | return pass/fail for objective agent-process or repo-ownership invariants |
 | `.agents/skills/*` | technique | teach repeatable methods; do not hide routing or done rules |
 | `.agents/logs/*` | handoff receipts | orient resumption; never treat as live law |
 | repo docs | current domain or product vocabulary | keep terms and relationships current |
@@ -76,20 +105,14 @@ A pre-edit ownership receipt is the pre-action callout that proves the agent has
 Use it for nontrivial edits, and always for durable product code, `.agents` control-plane changes, docs/tracker/skill/history changes, and expensive repo-specific lanes.
 
 ```text
-Request:
-Resolver:
-Why this resolver:
-Source of truth / evidence order:
 Owner surface:
 Allowed writes:
 Forbidden surfaces:
 Done gate:
-First oracle (fastest relevant check after editing):
-Next oracle (stronger/broader check before done):
-Skill used (last, if material):
+First real check:
 ```
 
-The receipt is not a plan, not a session log, and not a new resolver. It can be a short chat update. It prevents stale ownership and wrong-surface edits before action. When multiple sources can disagree, name the evidence order instead of pretending there is only one source.
+The receipt is not a plan, not a session log, and not a new resolver. It can be a short chat update. It prevents stale ownership and wrong-surface edits before action. Name evidence order only when sources can disagree. Name a next oracle only when the first check is deliberately narrower than the final done claim.
 
 Logs happen after durable work. A log may compress receipt fields into orientation when they help future resumption, but the log does not replace the pre-edit receipt.
 
@@ -102,9 +125,11 @@ When a rule, note, or technique needs a home, place it by function:
 | What kind of task is this? | `.agents/router.md` |
 | What scope, reads, writes, and non-goals apply? | `.agents/resolvers/*` |
 | What makes the work done? | `.agents/gates/*` |
+| What loop should the human/agent run? | `.agents/commands/*` |
+| What objective invariant proves pass/fail? | `.agents/checks/*` |
 | What repeatable method or tool technique helps? | `.agents/skills/*` |
 | What objective control-plane invariant needs repeatable checking? | `.agents/skills/agents-kit/scripts/*` |
-| What objective factory or repo invariant needs repeatable checking? | `docs/checks/*` or package scripts |
+| What objective product or package invariant needs repeatable checking? | package scripts or tests |
 | What happened in this run? | `.agents/logs/*` |
 | What evidence or decision was true at a date? | `history/*` |
 | What completed plan should be archived? | `history/plans/*` |
@@ -119,7 +144,8 @@ Use timing before placement gets fuzzy:
 | --- | --- |
 | before editing, to classify scope, reads, allowed writes, or non-goals | resolver |
 | before claiming done, to prove the task is complete | gate |
-| as an objective repeatable filesystem, AST, command, or probe check | script, test, or `docs/checks/*` |
+| as a recurring hot path that collapses manual routing or sensor assembly | `.agents/commands/*` |
+| as an objective repeatable filesystem, AST, command, or probe check | `.agents/checks/*`, tests, or package scripts |
 | to explain why the product, app, or boundary is shaped that way | docs or ADR |
 | to perform a repeatable technique across cases | skill |
 
@@ -172,9 +198,19 @@ Generic skill design is not enough. Repo-local skill design must ask:
 - Is this reusable across tasks, or just evidence from one run?
 - Would putting this in a skill make the agent skip a required repo boundary?
 
-## Scripts
+## Commands And Checks
 
-Scripts in `.agents` are control-plane health checks, not factory-state sensors or product task runners.
+Commands are optional hop-collapsing entrypoints. Checks, gates, product tests, package scripts, and CI own truth.
+
+A command earns its file when it removes repeated manual routing or sensor assembly without owning the verdict.
+
+Use `.agents/commands/*` for human-invoked hop-collapsers. A command may gather facts, print receipts, and call checks. It should not become a broad orchestrator.
+
+Use `.agents/checks/*` for objective agent-process or repo-ownership invariants. Checks exit nonzero on failure.
+
+Product build/test/runtime checks that engineers run outside agent workflow belong in package scripts or package tests. Docs explain product/domain truth; they do not own executable agent oracles.
+
+## Agents-Kit Scripts
 
 A script belongs under `.agents/skills/agents-kit/scripts/` only when it mechanically checks the `.agents` control plane itself:
 
@@ -186,7 +222,7 @@ Current accepted `agents-kit` scripts:
 
 - `check-agents-kit-health.py`: lints the live control-plane structure.
 
-A script does not belong in `.agents` when it checks factory artifacts, builds product code, runs app workflows, performs migration work, manages active project status, or replaces a resolver/gate decision. Put factory and repo checks in `docs/checks/*`; put product commands in package scripts; put one-off evidence in `history/*`.
+A script does not belong under `.agents/skills/agents-kit/scripts/` when it checks factory artifacts, builds product code, runs app workflows, performs migration work, manages active project status, or replaces a resolver/gate decision. Put agent/repo checks in `.agents/checks/*`; put product commands in package scripts; put one-off evidence in `history/*`.
 
 ## Artifacts
 
@@ -200,7 +236,7 @@ Artifact placement:
 
 | Artifact | Home |
 | --- | --- |
-| Active operating rule | `.agents/router.md`, `.agents/resolvers/*`, `.agents/gates/*`, or `.agents/skills/*` |
+| Active operating rule | `.agents/router.md`, `.agents/resolvers/*`, `.agents/gates/*`, `.agents/commands/*`, `.agents/checks/*`, or `.agents/skills/*` |
 | Session handoff note | `.agents/logs/*` |
 | Completed plan | `history/plans/*` |
 | Execution ledger | `history/*` |
@@ -247,7 +283,7 @@ Use the smallest live surface that will still be read in four weeks:
 | task classification | `.agents/router.md` |
 | scope, reads, writes, or non-goals | `.agents/resolvers/*` |
 | done check | `.agents/gates/*` |
-| mechanical invariant | tests or `docs/checks/*` |
+| mechanical invariant | tests, package scripts, or `.agents/checks/*` |
 | run-specific evidence | `history/*` |
 
 Prefer updating the existing owning doctrine over adding a second source of truth.
@@ -274,6 +310,6 @@ Do not bloat `AGENTS.md` to compensate for weak downstream files.
 
 The control plane should be lintable.
 
-A health pass should check that router rows point to real files, every resolver has non-goals and a cold-agent test, every gate has concrete checks, every named skill exists, `history/lessons/` exists, logs are not treated as doctrine, history is not treated as current state, retired runtime-state files are absent from `.agents`, and lesson notes have promotion-state metadata.
+A health pass should check that router rows point to real files, every resolver has non-goals and a cold-agent test, every command and gate path points to a real check when it names one, every named skill exists, `history/lessons/` exists, logs are not treated as doctrine, history is not treated as current state, retired runtime-state files are absent from `.agents`, and lesson notes have promotion-state metadata.
 
 The health check is not ceremony. It is how the system resists entropy.

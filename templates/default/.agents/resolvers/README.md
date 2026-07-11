@@ -19,4 +19,4 @@ Each resolver should state:
 
 If resolver confidence matters, record an explicit `Last Rinsed` note with the date, scenarios, and log link. Do not leave vague `Status: draft` labels behind as stale metadata.
 
-Use `.agents/resolvers/rule-rinse.md` for that pass.
+Use `.agents/resolvers/agent-tooling.md` plus `.agents/AGENT-CONTROL-PLANE.md` for that pass.

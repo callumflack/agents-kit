@@ -109,11 +109,11 @@ Owner examples:
 | product regression | selected product resolver, app code, and tests | selected product gate plus factory-failure gate |
 | stale spec | owning spec, plan, or test | evidence for the stale expectation plus selected owner gate and factory-failure gate |
 | external blocker | `.scratch/*`, blocker note, or relevant task state | exact HITL/blocker recorded when tracker state changes |
-| routing failure | `.agents/router.md` | agent-tooling or rule-rinse gate plus factory-failure gate |
-| scope/classification failure | `.agents/resolvers/*` | rule-rinse gate plus factory-failure gate |
-| weak gate | `.agents/gates/*` | rule-rinse gate plus factory-failure gate |
+| routing failure | `.agents/router.md` | agent-tooling gate plus factory-failure gate |
+| scope/classification failure | `.agents/resolvers/*` | agent-tooling gate plus factory-failure gate |
+| weak gate | `.agents/gates/*` | agent-tooling gate plus factory-failure gate |
 | technique gap | `.agents/skills/*` | agent-tooling gate plus factory-failure gate |
-| missing mechanical invariant | tests, scripts, or checks owned by the repo | relevant owner gate plus factory-failure gate |
+| missing mechanical invariant | `.agents/checks/*`, tests, or package scripts owned by the repo | relevant owner gate plus factory-failure gate |
 
 ## Learning Loop
 
@@ -137,11 +137,21 @@ Promotion states:
 | State | Meaning | Required action |
 | --- | --- | --- |
 | no-learning | Run-specific evidence only | keep in normal history/logs; do not create `history/lessons/*` |
-| context-only | Useful future context, but no mandatory behavior change | write or update `history/lessons/*` with the reason it is context-only. A context-only lesson must name its consult path — the specific resolver Required Reads line or skill that will surface it on its Applies When route; if no live surface will ever read it, the correct state is live-promotion or HITL, not context-only |
+| context-only | Useful future context, but no mandatory behavior change | write or update `history/lessons/*` with the reason it is context-only. A context-only lesson must name its consult path — the specific resolver Required Reads line or skill that will surface it on its Applies-When route; if no live surface will ever read it, the correct state is live-promotion or HITL, not context-only |
 | live-promotion | Future behavior must change | patch router, resolver, gate, skill, or mechanical check; update the lesson note if one exists |
 | HITL | Promotion owner or desired behavior is unclear | record the blocker and do not silently create law |
 
 A learning loop is incomplete if a note says only "not yet promoted" without explaining whether it is context-only, live-promotion, or HITL.
+
+### Anti-Consolidation Rule
+
+Do not treat lesson artifacts as a continuously rewritten memory store.
+
+Preserve source logs and history notes as episodic evidence. Prefer a new dated lesson artifact over broadening an old one. Update an existing lesson only to correct wrong information, add source links, clarify promotion state, or name the live owner surface that changed.
+
+Do not merge multiple lesson artifacts into a general doctrine note during maintenance. Maintenance must classify each artifact as keep, promote, archive, delete, or HITL.
+
+If future behavior must change, patch the narrow live owner surface. If it does not, keep the lesson context-only.
 
 ## Allowed Writes
 
@@ -151,7 +161,7 @@ A learning loop is incomplete if a note says only "not yet promoted" without exp
   - `.agents/resolvers/*` for scope/classification failures;
   - `.agents/gates/*` for weak done checks;
   - `.agents/skills/*` for repeatable technique gaps;
-  - repo-owned scripts, tests, or checks for missing mechanical invariants;
+  - `.agents/checks/*`, tests, or package scripts for missing mechanical invariants;
   - `.scratch/*` for task-state drift;
   - `history/lessons/*` for reusable context that is not yet live behavior;
   - `.agents/logs/*` for handoff context changes.

@@ -20,7 +20,7 @@ Prefer a new dated lesson artifact over rewriting an old one. Update an existing
 
 Do not merge lesson artifacts into a grand unified doctrine note. Maintenance passes classify each artifact as keep, promote, archive, delete, or HITL; they do not consolidate lessons by default.
 
-If future behavior must change, patch the narrow live owner surface: router, resolver, gate, skill, script, or check. If behavior does not need to change, keep the lesson context-only and preserve the episode trail.
+If future behavior must change, patch the narrow live owner surface: router, resolver, gate, command, check, skill, or script. If behavior does not need to change, keep the lesson context-only and preserve the episode trail.
 
 ## Shape
 

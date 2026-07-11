@@ -36,6 +36,16 @@ def extract_agent_paths(router_text: str) -> set[str]:
     return set(re.findall(r"`((?:\.agents|history)/[^`]+?\.md)`", router_text))
 
 
+def extract_check_paths(text: str) -> set[str]:
+    paths = set()
+    for match in re.findall(r"(\.agents/checks/[A-Za-z0-9._/-]+)", text):
+        path = match.rstrip(".,:;)")
+        if path.endswith("/") or "*" in path:
+            continue
+        paths.add(path)
+    return paths
+
+
 def warn(warnings: list[str], message: str) -> None:
     warnings.append(message)
 
@@ -93,6 +103,22 @@ def check_gates(errors: list[str]) -> None:
         done_markers = ["Done means", "done only when", "Minimum gate"]
         if not any(marker in text for marker in done_markers):
             fail(errors, f"{rel(path)} does not state done criteria")
+        for check_path in sorted(extract_check_paths(text)):
+            if not (ROOT / check_path).is_file():
+                fail(errors, f"{rel(path)} names missing check: {check_path}")
+
+
+def check_commands(errors: list[str]) -> None:
+    commands_root = ROOT / ".agents" / "commands"
+    if not commands_root.is_dir():
+        return
+    for path in sorted(commands_root.iterdir()):
+        if not path.is_file():
+            continue
+        text = read(path)
+        for check_path in sorted(extract_check_paths(text)):
+            if not (ROOT / check_path).is_file():
+                fail(errors, f"{rel(path)} names missing check: {check_path}")
 
 
 def check_skills(errors: list[str]) -> None:
@@ -181,6 +207,8 @@ def check_control_plane(errors: list[str]) -> None:
     require_file(errors, "AGENTS.md")
     require_file(errors, ".agents/README.md")
     require_file(errors, ".agents/AGENT-CONTROL-PLANE.md")
+    require_file(errors, ".agents/commands/README.md")
+    require_file(errors, ".agents/checks/README.md")
     require_file(errors, "history/lessons/README.md")
 
     agents_text = read(ROOT / "AGENTS.md")
@@ -194,7 +222,8 @@ def check_control_plane(errors: list[str]) -> None:
         "Health",
         "Placement Test",
         "Rule of Thumb",
-        "Scripts",
+        "Commands And Checks",
+        "Agents-Kit Scripts",
         "Skills",
     ]:
         if f"## {phrase}" not in doctrine:
@@ -255,7 +284,7 @@ def check_lessons(errors: list[str]) -> None:
 
         if state == "live-promotion":
             owner_paths = re.findall(
-                r"`((?:AGENTS\.md|\.agents/(?:router\.md|resolvers/[^`]+|gates/[^`]+|skills/[^`]+|logs/README\.md)|docs/checks/[^`]+|(?:apps|packages)/[^`]+))`",
+                r"`((?:AGENTS\.md|\.agents/(?:router\.md|resolvers/[^`]+|gates/[^`]+|commands/[^`]+|checks/[^`]+|skills/[^`]+|logs/README\.md)|(?:apps|packages)/[^`]+))`",
                 text,
             )
             if not owner_paths:
@@ -279,6 +308,7 @@ def main() -> int:
     check_router(errors)
     check_resolvers(errors, warnings)
     check_gates(errors)
+    check_commands(errors)
     check_skills(errors)
     check_skill_inventory(errors)
     check_lessons(errors)

@@ -2,7 +2,7 @@
 
 Live agent operating files for this repo.
 
-`AGENTS.md` points. Router dispatches. Resolvers scope. Gates verify. Skills teach technique. Logs orient handoff. History is evidence.
+`AGENTS.md` points. Router dispatches. Resolvers scope. Gates name proof. Commands collapse hops. Checks prove. Skills teach technique. Logs orient handoff. History is evidence.
 
 Rule of thumb: if a cold agent does not need it to orient, route, constrain scope, apply reusable technique, verify done, or resume handoff, it does not belong in `.agents`.
 
@@ -18,13 +18,19 @@ AGENTS.md
   dispatch table: task trigger -> resolver -> gate -> skill
 
 .agents/AGENT-CONTROL-PLANE.md
-  doctrine for where control-plane rules, gates, skills, logs, history, and lessons belong
+  doctrine for where control-plane rules, gates, commands, checks, skills, logs, history, and lessons belong
 
 .agents/resolvers/
   task-specific decision rules
 
 .agents/gates/
   done-means-done checklists
+
+.agents/commands/
+  executable hop-collapsers for recurring hot paths
+
+.agents/checks/
+  mechanical pass/fail oracles for agent-process or repo-ownership invariants
 
 .agents/skills/
   repo-local techniques loaded only when routed
@@ -49,7 +55,7 @@ history/lessons/
 
 Repair classification lives in `.agents/resolvers/factory-failure.md`.
 
-Use this map only for placement after the classifier names the owner: router dispatches, resolvers scope, gates verify, skills teach technique, logs orient handoff, and history preserves evidence.
+Use this map only for placement after the classifier names the owner: router dispatches, resolvers scope, gates name proof, commands collapse hops, checks prove, skills teach technique, logs orient handoff, and history preserves evidence.
 
 Do not add workflow detail to `AGENTS.md`.
 Do not learn live rules from `.agents/logs/` or `history/`.

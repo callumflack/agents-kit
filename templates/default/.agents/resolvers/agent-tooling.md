@@ -2,7 +2,7 @@
 
 ## Trigger
 
-Use for `AGENTS.md`, `.agents/**`, `.scratch/**`, docs or tracker setup, skills, skill locks, lesson artifacts, or host-specific agent setup.
+Use for `AGENTS.md`, `.agents/**`, `.scratch/**`, docs or tracker setup, skills, skill locks, lesson artifacts, host-specific agent setup, initial repo setup, package-script plumbing, or resolver/gate/router quality passes.
 
 ## Required Reads
 
@@ -12,6 +12,7 @@ Use for `AGENTS.md`, `.agents/**`, `.scratch/**`, docs or tracker setup, skills,
 - `.agents/router.md`
 - `.agents/skills/agents-kit/SKILL.md` when changing `.agents` control-plane behavior
 - relevant skill, docs, tracker, scratch, or host directory
+- relevant `.agents/commands/*` or `.agents/checks/*` file when changing commands or checks
 - `history/lessons/README.md` when changing lesson-artifact shape
 - `skills-lock.json` when skill inventory changes
 
@@ -20,18 +21,14 @@ Use for `AGENTS.md`, `.agents/**`, `.scratch/**`, docs or tracker setup, skills,
 Before nontrivial edits in this lane, state the pre-edit ownership receipt:
 
 ```text
-Request:
-Resolver:
-Why this resolver:
-Source of truth / evidence order:
 Owner surface:
 Allowed writes:
 Forbidden surfaces:
 Done gate:
-First oracle:
-Next oracle:
-Skill used (last, if material):
+First real check:
 ```
+
+Name evidence order only when sources can disagree. Name a next oracle only when the first check is deliberately narrower than the final done claim.
 
 The receipt does not replace `.agents/logs/`. If durable control-plane or log doctrine changed, write or update the session log at closeout.
 
@@ -58,10 +55,22 @@ python3 .agents/skills/agents-kit/scripts/check-skill-frontmatter.py .agents/ski
 
 If a repo-local skill is listed in `skills-lock.json`, treat it as an installed mirror. Do not edit that skill or files under its skill directory for local behavior repair unless the user explicitly asks to change that installed skill. Put local operating rules in the narrow live resolver, gate, log doctrine, history learning, or product docs instead.
 
+## Delegated Subagent Work
+
+When the user asks this agent to run a subagent, treat delegation as agent tooling, not a new skill requirement.
+
+- Spawn each requested worker once and report the agent id.
+- Keep parent and worker write sets disjoint; do not duplicate the worker's assigned work in the parent.
+- Do not block the parent on a long synchronous wait unless integration depends on the result; poll briefly, then resume when the worker reports back.
+- When the worker returns, inspect its diff or findings, verify the claimed owner surfaces, and close the worker.
+- If the same spawn, wait, or duplicated-work miss repeats and a tool-call transcript oracle exists, promote the narrow invariant to `.agents/checks/*`; otherwise route the repair through `.agents/resolvers/factory-failure.md`.
+
+This does not apply to user-owned external threads; those follow the host thread tooling.
+
 ## Owned Surfaces
 
 - agent bootloader;
-- router/resolvers/gates/log rules;
+- router/resolvers/gates/commands/checks/log rules;
 - `agents-kit` harness check scripts;
 - local docs, tracker, and scratch packets;
 - repo-local skills;
@@ -85,6 +94,7 @@ If a repo-local skill is listed in `skills-lock.json`, treat it as an installed 
 - turning `history/lessons/` into live law or a lifecycle owner;
 - creating `.scratch` only to represent chat-stated focus;
 - putting current-focus or build-loop runtime state into `.agents`;
+- using `.agents/skills/agents-kit/scripts/*` for objective repo checks that belong in `.agents/checks/*`;
 - using `.agents/skills/agents-kit/scripts/*` for product builds, app workflows, migration runners, active project status, or dashboard sync.
 
 ## Gate
@@ -99,6 +109,12 @@ If the user states a focus in chat, follow that focus through the router. `.agen
 
 If adding or changing an `agents-kit` script, the agent can name the exact control-plane invariant it checks and why that check is objective enough to automate.
 
+If adding or changing an `.agents/checks/*` file, the agent can name the exact invariant it proves and why the repo can observe it objectively.
+
+If rinsing router/resolver/gate quality, the agent uses this resolver plus `.agents/AGENT-CONTROL-PLANE.md`, patches the narrow owner surface, runs agents-kit health, and does not route through a separate rule-rinse lane.
+
+Given "run a subagent to review tests", the parent spawns one worker, reports its id, keeps parent edits separate, verifies the returned findings, and closes the worker. It does not do the same review in parallel unless the user asked for redundant reviews.
+
 ## Failure Signs
 
 - third-party skills are hand-authored under `.agents/skills/*` instead of installed through the repo skill manager;
@@ -108,3 +124,5 @@ If adding or changing an `agents-kit` script, the agent can name the exact contr
 - chat-stated focus is forced into `.scratch` even though no plan or issue loop exists;
 - current-focus or build-loop runtime state is added back into `.agents`;
 - an `agents-kit` script checks product state or runs product work instead of checking the control plane.
+- resolver, gate, or router quality work is routed through a separate rule-rinse lane instead of this resolver.
+- delegated subagent work is spawned twice, duplicated in the parent, or treated as done without inspecting the worker result.

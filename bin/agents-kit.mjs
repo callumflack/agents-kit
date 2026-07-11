@@ -83,6 +83,8 @@ function isReviewOnly(file) {
     file === ".agents/router.md" ||
     file.startsWith(".agents/resolvers/") ||
     file.startsWith(".agents/gates/") ||
+    file.startsWith(".agents/commands/") ||
+    file.startsWith(".agents/checks/") ||
     file.startsWith(".agents/logs/") ||
     file.startsWith("history/") ||
     file.startsWith(".scratch/")

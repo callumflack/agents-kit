@@ -13,7 +13,63 @@ in, or directly implied by, the live `unity-surfaces` `.agents` system.
 No blog post is part of this transport. The post comes after the installable
 harness exists.
 
-## Current `agents-kit` Repo Shape
+## July 2026 Rinse Decisions
+
+The Unity rinse adds five portable decisions from the June commit sequence.
+
+- `dfbec319` is the main portable source: port the spine `repeated friction -> owning surface -> smallest durable constraint -> nearest oracle`; port the authority split where commands collapse hops, checks prove, and gates name done checks; route resolver/gate/router quality work through `agent-tooling` rather than a separate `rule-rinse` lane.
+- `6075a07f` is a pattern, not a default check: copy/class assertion enforcement belongs in a repo-owned `.agents/checks/*` or hook only when that repo has the same objective test invariant. Do not ship the Unity-specific test-copy check in the default seed.
+- `316a4972` is mostly a host-adapter pattern: role/adaptor structure belongs in a repo only after it has real host agent surfaces. Do not ship Unity's `test-reviewer` or doc-drift roles as generic defaults.
+- `6703041b` is the counterweight: trim enforcement when it becomes heavier than the miss. The subagent repair belongs first in `.agents/resolvers/agent-tooling.md`; promote to `.agents/checks/*` only if a transcript or tool-call oracle exists.
+- `aa3dd514` is the delegated-subagent proof commit: port the resolver rule and its "no transcript oracle yet" reasoning, but do not port Unity's dated log into the default seed.
+
+## Additional Commit Archaeology
+
+Comparing Unity history and the current `agents-kit` template gives this transport decision table.
+
+| Commit | Unity change | Transport decision |
+| --- | --- | --- |
+| `83d08dca` | Adds the factory-failure control loop, router row, gate, and health coverage. | Already core seed behavior. Keep generic failure classification and live-owner repair. |
+| `fd778261` | Renames learning artifacts to `history/lessons` and makes lessons an artifact shelf, not live law. | Already core seed behavior. Keep `history/lessons` and `factory-failure` lifecycle ownership. |
+| `af55c851` | Adds anti-consolidation rules for lesson artifacts. | Already/now core seed behavior. Preserve source episodes and promotion state. |
+| `8c6c0e3f` | Adds a Unity factory-state checker under `agents-kit` scripts. | Do not port the checker. Later doctrine supersedes it: repo/factory checks belong in `.agents/checks/*`, not `agents-kit` scripts. |
+| `22c499b1` | Adds stack-landing dirty-diff rules for stacked PR work. | Do not ship by default. It is useful repo doctrine when a repo uses the `stack` workflow, but too specific for the portable seed. |
+| `9c93e919` | Adds Unity git handover gate and branch/upstream rules. | Do not ship as default doctrine. Target repos have different branch protections; keep only stage-explicit-paths and review-only install protection. |
+| `31bed50f` | Tightens Unity testing gate around class/style checksum assertions. | Do not ship by default. Treat as an example of a repo-owned test invariant. |
+| `6075a07f` | Adds PostToolUse hook plus copy/class assertion check. | Do not ship by default. Port the doctrine pattern only: hooks/checks are for mechanically observable invariants. |
+| `316a4972` | Adds roles, hooks, governed loops, and adapter doctrine. | Do not ship by default. Keep role/adapter and loop machinery out until a target repo has actual host-agent surfaces or recurring loop contracts. |
+| `6703041b` | Trims remote-guard enforcement after it became too heavy. | Port the restraint: avoid heavy gates when a smaller resolver rule or git/platform guardrail is enough. |
+| `dfbec319` | Consolidates command/check/gate authority and retires stale lanes. | Ported: commands/checks surfaces, health coverage, and agent-tooling-owned quality passes. |
+| `aa3dd514` | Adds delegated subagent flow to `agent-tooling`. | Ported: resolver rule and check-promotion condition. |
+| `32845c27` | Thins and hardens the Unity control plane after the rinse. | Use as the live comparison point for the portable spine. Keep the five-field receipt, fail-closed proof expectations, and generic lanes; reject Unity product surfaces, roles, loops, hooks, logs, lesson bodies, and installed-skill inventory. |
+| `2a7e7645` | Separates repo-owned materialization hashes from installer-owned import metadata. | Adopt the ownership split without fake provenance: a seed manifest declares `agents-kit` and an empty versioned materialization map; `skills-lock.json` remains the import-metadata owner. Implementation and verification remain part of this refactor's done gate. |
+
+Two integrity decisions remain required before this transport is complete:
+
+- The package verifier must reject conflict markers by inspecting shipped template content, and a negative self-test must prove that rejection. `git diff --check` remains an independent maintainer oracle.
+- The seed must declare skill ownership in `.agents/skills/manifest.json` without inventing imported skills or hashes. The health checker and installer review-only behavior must validate that contract before the manifest decision can be recorded as implemented.
+
+## Codebase Comparison Result
+
+The live Unity `.agents` tree is intentionally larger than the default seed: it includes product resolvers, package gates, role adapters, governed loops, hooks, commands, checks, many installed skills, and dated logs/lessons. The portable seed should carry the reusable owner/oracle contract, not Unity's product surface inventory.
+
+What must match at the seed level:
+
+- `AGENTS.md` stays a boot pointer.
+- Router defaults stay generic: `agent-tooling` and `factory-failure`.
+- `agent-tooling` owns control-plane edits, commands/checks placement, skill inventory, and delegated subagent behavior.
+- `factory-failure` owns classification, learning lifecycle, anti-consolidation, and live-owner repair.
+- `commands/` and `checks/` exist as first-class surfaces.
+- `agents-kit` scripts check the control plane only.
+
+What should not match by default:
+
+- Unity product rows: web, runtime-boundary, shared-package, testing.
+- Unity commands/checks: git-handover, test-proof, runtime-boundary, visible-copy, factory-state.
+- Unity hooks, roles, loops, host adapters, and installed skill inventory.
+- Unity logs and lesson bodies, except for generic lesson shape and lifecycle doctrine.
+
+## Pre-Refactor `agents-kit` Repo Shape
 
 The old repo already answers the installer question.
 
@@ -87,6 +143,12 @@ AGENTS.md
 .agents/gates/
   done-means-done checks
 
+.agents/commands/
+  executable hop-collapsers for recurring hot paths
+
+.agents/checks/
+  mechanical pass/fail oracles for agent-process or repo-ownership invariants
+
 .agents/skills/
   repo-local techniques and bundled helper scripts
 
@@ -117,6 +179,8 @@ The important structure is the authority split:
 | `.agents/router.md` | routing law |
 | `.agents/resolvers/*` | owner and scope law |
 | `.agents/gates/*` | done law |
+| `.agents/commands/*` | hop-collapsing entrypoints |
+| `.agents/checks/*` | mechanical oracles |
 | `.agents/skills/*` | technique |
 | `.agents/logs/*` | handoff orientation, never live law |
 | `.scratch/*` | active execution state, not doctrine |
@@ -140,12 +204,14 @@ templates/default/
       README.md
       agent-tooling.md
       factory-failure.md
-      rule-rinse.md
     gates/
       README.md
       agent-tooling.md
       factory-failure.md
-      rule-rinse.md
+    commands/
+      README.md
+    checks/
+      README.md
     skills/
       README.md
       agents-kit/
@@ -188,8 +254,7 @@ Port these live concepts directly:
   - update logs when handoff changes;
   - keep repair rule live.
 - `.agents/README.md`:
-  - "AGENTS points, router dispatches, resolvers scope, gates verify, skills
-    teach, logs orient, history is evidence";
+  - "AGENTS points, router dispatches, resolvers scope, gates name proof, commands collapse hops, checks prove, skills teach, logs orient, history is evidence";
   - map of each surface;
   - no learning live rules from logs or history;
   - resolver quality loop.
@@ -200,14 +265,14 @@ Port these live concepts directly:
   - pre-edit ownership receipt;
   - placement test;
   - promotion timing;
-  - resolver/gate/skill distinction;
-  - scripts boundary;
+  - resolver/gate/command/check/skill distinction;
+  - agents-kit scripts boundary;
   - artifact ownership;
   - settlement check;
   - doctrine pressure check;
   - lessons lifecycle boundary.
 - `.agents/router.md`:
-  - generic rows only: agent-tooling, factory-failure, rule-rinse;
+  - generic rows only: agent-tooling and factory-failure;
   - clear priority rules;
   - no Unity product rows.
 - `.agents/resolvers/agent-tooling.md`:
@@ -216,18 +281,22 @@ Port these live concepts directly:
   - skill inventory boundary;
   - installed skill mirror boundary;
   - local-only skill authoring rule;
+  - delegated subagent work rule: spawn once, report id, keep write sets disjoint, poll/await cleanly, verify returned result, close worker;
   - allowed writes and non-goals;
   - no product code by default.
 - `.agents/gates/agent-tooling.md`:
   - receipt required for nontrivial lane edits;
-  - health check required for router/resolver/gate/skill/lesson structure;
+  - health check required for router/resolver/gate/command/check/skill/lesson structure;
   - lessons stay in `history/lessons`;
   - skill provenance checked before inventory edits;
+  - commands collapse repeated hops and do not own verdicts;
+  - checks own objective pass/fail;
   - `AGENTS.md` stays short;
   - `.agents` contains no current-focus/build-loop runtime state;
   - local-only files are not accidentally staged.
 - `.agents/resolvers/factory-failure.md`:
   - classify failures before repair;
+  - use the friction-promotion shape for repeated or expensive misses;
   - distinguish normal product iteration from agent-process failure;
   - choose owner surface before patching;
   - learning lifecycle belongs here, not in `history/lessons`;
@@ -240,11 +309,10 @@ Port these live concepts directly:
   - selected owner gate run;
   - exactly one outcome recorded;
   - skipped checks report blocker and residual risk.
-- `.agents/resolvers/rule-rinse.md` and `.agents/gates/rule-rinse.md`:
-  - rules are live hypotheses;
-  - test against real scenarios;
-  - add non-goals and cold-agent tests;
-  - record rinse in logs.
+- `.agents/commands/README.md` and `.agents/checks/README.md`:
+  - commands collapse repeated manual hops without owning verdicts;
+  - checks prove objective repo-observable invariants;
+  - no check is added when the repo cannot observe the miss.
 - `.agents/logs/README.md`:
   - logs orient resumption;
   - logs are not changelogs, commit proof, or live law;
@@ -261,6 +329,7 @@ Port these live concepts directly:
   - verify router references;
   - verify resolver required sections and gate paths;
   - verify gates state done criteria;
+  - verify gates and commands only name existing `.agents/checks/*` paths;
   - verify skill frontmatter;
   - verify locked skill paths when `skills-lock.json` exists;
   - verify `AGENTS.md` remains short;
@@ -282,12 +351,12 @@ Use this first. Pick the narrowest matching row.
 | Trigger | Resolver | Gate | Skill |
 | --- | --- | --- | --- |
 | failed checks, repeated misses, stale task state, learning-promotion questions, repair-loop decisions, maintenance-rinse findings | `.agents/resolvers/factory-failure.md` | `.agents/gates/factory-failure.md` | `.agents/skills/agents-kit` when patching `.agents` or learning surfaces; otherwise route by classified owner |
-| agent tooling, docs placement, `.agents` control-plane, `.scratch`, PRDs, skills, host-specific agent setup, lesson artifacts | `.agents/resolvers/agent-tooling.md` | `.agents/gates/agent-tooling.md` | `.agents/skills/agents-kit` for `.agents` changes; otherwise matching `.agents/skills/*` |
-| resolver/gate/router quality pass | `.agents/resolvers/rule-rinse.md` | `.agents/gates/rule-rinse.md` | none by default |
+| agent tooling, docs placement, `.agents` control-plane, `.agents/commands`, `.agents/checks`, `.scratch`, PRDs, skills, host-specific agent setup, lesson artifacts, initial repo setup, package-script plumbing, resolver/gate/router quality pass | `.agents/resolvers/agent-tooling.md` | `.agents/gates/agent-tooling.md` | `.agents/skills/agents-kit` for `.agents` changes; otherwise matching `.agents/skills/*` |
 
 ## Priority Rules
 
 - Agent tooling work stays in the control-plane lane unless the user explicitly switches into product implementation.
+- Resolver, gate, and router quality passes use agent-tooling plus `.agents/AGENT-CONTROL-PLANE.md`; do not create a second live lane for rule cleanup.
 - Factory failure classifies a miss before repair; it does not replace the selected owner resolver or gate.
 - Repo-specific product rows should be added only after live repo evidence exists.
 ```
@@ -323,6 +392,8 @@ Review-only / local-doctrine files:
 - `.agents/router.md`
 - `.agents/resolvers/*`
 - `.agents/gates/*`
+- `.agents/commands/*`
+- `.agents/checks/*`
 - `.agents/logs/*`
 - `history/*`
 - `.scratch/*`
@@ -385,11 +456,13 @@ Regression checks:
 4. Add `skills-lock.json` as an empty template object, or make the health
    checker explicitly tolerate its absence in fresh installs.
 5. Add `factory-failure` resolver and gate.
-6. Port `check-skill-frontmatter.py`.
-7. Update `verify-template.mjs` required files.
-8. Update `README.md` to describe install/adopt/update against the new harness.
-9. Run source verification and smoke tests.
-10. Only after that, write the public post.
+6. Add `commands/README.md` and `checks/README.md`; do not ship Unity product checks.
+7. Retire the default `rule-rinse` lane; quality passes route through `agent-tooling`.
+8. Port `check-skill-frontmatter.py`.
+9. Update `verify-template.mjs` required files.
+10. Update `README.md` to describe install/adopt/update against the new harness.
+11. Run source verification and smoke tests.
+12. Only after that, write the public post.
 
 ## Non-Goals
 
@@ -398,6 +471,7 @@ Regression checks:
 - Do not transport `history/solutions`.
 - Do not make a workflow engine.
 - Do not turn logs into source of truth.
+- Do not ship a giant subagent gate without a real transcript/tool-call oracle.
 - Do not make the blog post part of the first transport.
 - Do not make the old template and live Unity doctrine compete.
 
@@ -406,6 +480,7 @@ Regression checks:
 The extraction is done only when:
 
 - `templates/default` reflects the live `unity-surfaces` harness roles;
+- the authority split is visible: commands collapse hops, checks prove, gates name done checks;
 - old template-only concepts are removed or intentionally retained with live
   evidence;
 - `npm run verify` passes;

@@ -15,7 +15,9 @@ For a visual walkthrough of the harness, open [dot-agents-system.html](dot-agent
 - `AGENTS.md` points to the control plane.
 - `.agents/router.md` dispatches task shape to resolver, gate, and skill.
 - `.agents/resolvers/*` scope reads, writes, owners, and non-goals.
-- `.agents/gates/*` verify done with observable checks.
+- `.agents/gates/*` name observable done checks.
+- `.agents/commands/*` collapse repeated workflow hops.
+- `.agents/checks/*` prove objective agent-process or repo-ownership invariants.
 - `.agents/skills/*` teach repeatable technique.
 - `.agents/logs/*` orient handoff.
 - `history/*` preserves dated evidence.
@@ -105,12 +107,14 @@ skills-lock.json
     README.md
     agent-tooling.md
     factory-failure.md
-    rule-rinse.md
   gates/
     README.md
     agent-tooling.md
     factory-failure.md
-    rule-rinse.md
+  commands/
+    README.md
+  checks/
+    README.md
   skills/
     README.md
     agents-kit/
@@ -141,6 +145,8 @@ skills-lock.json
 .agents/router.md
 .agents/resolvers/*
 .agents/gates/*
+.agents/commands/*
+.agents/checks/*
 .agents/logs/*
 history/*
 .scratch/*
@@ -156,8 +162,9 @@ After install:
 2. Replace placeholder router rows only after live repo evidence exists.
 3. Add repo-specific resolvers for recurring task lanes.
 4. Add gates with concrete checks, not vague verification language.
-5. Keep logs for handoff context, not live law.
-6. Keep dated evidence in `history/`.
+5. Add commands only for repeated hop-collapsers; add checks only for objective oracles the repo can observe.
+6. Keep logs for handoff context, not live law.
+7. Keep dated evidence in `history/`.
 
 ## Verify
 

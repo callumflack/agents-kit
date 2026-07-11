@@ -15,14 +15,17 @@ Use the nearest live source:
 2. `.agents/router.md` owns task routing.
 3. `.agents/resolvers/*` owns scope, reads, writes, owners, and non-goals.
 4. `.agents/gates/*` owns done checks.
-5. `.agents/skills/*` owns repeatable technique.
-6. `.agents/logs/*` owns handoff notes, not live law.
-7. `history/*` owns dated evidence, not current law.
-8. `skills-lock.json` records installed skill mirrors.
+5. `.agents/commands/*` owns executable hop-collapsers.
+6. `.agents/checks/*` owns objective pass/fail oracles.
+7. `.agents/skills/*` owns repeatable technique.
+8. `.agents/logs/*` owns handoff notes, not live law.
+9. `history/*` owns dated evidence, not current law.
+10. `skills-lock.json` records installed skill mirrors.
 
 ## Modes
 
 - Control-plane edit: change the narrowest `.agents/**`, `AGENTS.md`, `skills-lock.json`, or `history/*` owner surface.
+- Command/check edit: change `.agents/commands/*` only for repeated hop-collapsers; change `.agents/checks/*` only for objective oracles the repo can observe.
 - Skill edit: change `.agents/skills/<name>/SKILL.md` only after checking `skills-lock.json` and the existing skill directory.
 - Health-script edit: change `.agents/skills/agents-kit/scripts/*`; run the local health gate.
 - Read-only assessment: inspect live files, name owner and oracle, then report without edits.
@@ -54,12 +57,14 @@ Put instructions where they act.
 | What task route applies? | `.agents/router.md` |
 | What scope, reads, writes, and non-goals apply? | `.agents/resolvers/*` |
 | What proves done? | `.agents/gates/*` |
+| What repeated hop should be collapsed? | `.agents/commands/*` |
+| What objective oracle returns pass/fail? | `.agents/checks/*` |
 | What repeatable method helps? | `.agents/skills/*` |
 | What objective control-plane invariant needs checking? | `.agents/skills/agents-kit/scripts/*` |
 | What happened this run? | `.agents/logs/*` |
 | What dated evidence exists? | `history/*` |
 
-Do not duplicate full control-plane doctrine in this skill.
+Do not duplicate full control-plane doctrine in this skill. Delegated subagent choreography belongs in `.agents/resolvers/agent-tooling.md` unless a real transcript or tool-call oracle exists; only then promote the narrow invariant to `.agents/checks/*`.
 
 ## Skill Boundary
 

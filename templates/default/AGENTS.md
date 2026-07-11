@@ -14,8 +14,8 @@ Boot file only. Points to the live `.agents` control plane; do not put workflow 
 
 - Stage explicit paths only.
 - Do not commit secrets, local credentials, `.env*`, caches, build output, or copied `node_modules`.
-- `.agents/` is the control plane: router, resolvers, gates, logs, skills.
-- Repo-specific product, runtime, docs, and tracker rules belong in resolvers, gates, docs, or skills, not in this boot file.
+- `.agents/` is the control plane: router, resolvers, gates, commands, checks, logs, skills.
+- Repo-specific product, runtime, docs, and tracker rules belong in resolvers, gates, commands, checks, docs, or skills, not in this boot file.
 
 ## Repair Rule
 
@@ -28,4 +28,4 @@ If the user says `stop`, `no`, `not that`, or repeats the same correction class:
 - do not fix forward until the task is re-aligned;
 - then route repair through `.agents/resolvers/factory-failure.md`.
 
-`AGENTS.md` points. Resolvers decide shape. Gates decide done. Skills hold technique. Logs orient the next session.
+`AGENTS.md` points. Resolvers decide shape. Gates name proof. Commands collapse hops. Checks prove. Skills hold technique. Logs orient the next session.
